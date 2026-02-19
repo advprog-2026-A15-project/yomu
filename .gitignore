@@ -1,0 +1,21 @@
+# Java / Gradle
+.gradle/
+build/
+bin/
+out/
+.idea/
+*.iml
+*.class
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+.eslintcache
+
+# Environment & Secrets
+.env
+application.properties
+
+# OS
+.DS_Store
+Thumbs.db
