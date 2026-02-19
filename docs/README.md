@@ -12,11 +12,9 @@
 - Login ke [Supabase](https://supabase.com)
 - Buat project baru (simpan passwordnya)
 - Klik Connect
-![](./assets/image1.png){width="6.268055555555556in"
-height="1.7826388888888889in"}
+![](./assets/image1.png)
 - Type: JDBC, method: session pooler
-![](./assets/image2.png){width="6.268055555555556in"
-height="3.6145833333333335in"}
+![](./assets/image2.png)
 - Copy URL nya, taruh di `application.properties` bagian
 `spring.datasource.url`, modif belakangnya pakai `/postgres?sslmode=require`
 Contoh:
