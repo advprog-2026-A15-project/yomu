@@ -32,3 +32,6 @@ Contoh:
 Contoh:
 `spring.datasource.username=postgres.xxxxxxxxxxxxxxxxxxxx`
 - `spring.datasource.password=[PASSWORD PROJECT KALIAN]`
+
+# Docs Group Preparation
+Link : <a href="https://docs.google.com/document/d/1qXx9EYBr9EgFPy5gCOpMnVIi1kwDC42dGiQXf2kc2eI/edit?usp=sharing">Prep Group A15</a>
