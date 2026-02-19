@@ -1,7 +1,7 @@
 spring.application.name=backend
 
-spring.datasource.url=[GANTI_DENGAN_URL_DATABASE]
-spring.datasource.username=postgres
+spring.datasource.url=[URL JDBC, BELAKANGNYA PAKAI /postgres?sslmode=require]
+spring.datasource.username=postgres.XXXXXXXXXXXXXXXXXXXX
 spring.datasource.password=[GANTI_DENGAN_PASSWORD_PROJECT]
 spring.datasource.driver-class-name=org.postgresql.Driver
 
