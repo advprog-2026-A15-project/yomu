@@ -1,3 +1,12 @@
+## 👥 Anggota Kelompok A15
+- M. Adella Fathir Supriadi (2406495640)
+- Ali Akbar Murthadha (2406495754)
+- Christna Yosua Rotinsulu (2406495691)
+- Nathanael Leander Herdanatra (2406421320)
+- Tirta Rendy Siahaan (2406355621)
+
+
+
 # Cara Setup Aplikasi
 
 - Buka folder `backend` di IntelliJ IDEA Ultimate.
