@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS bacaan (
+    id UUID PRIMARY KEY,
+    judul VARCHAR(255) NOT NULL,
+    isi_teks TEXT NOT NULL
+);
