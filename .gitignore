@@ -19,3 +19,8 @@ application.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# H2 Database files
+*.mv.db
+*.trace.db
+data/
