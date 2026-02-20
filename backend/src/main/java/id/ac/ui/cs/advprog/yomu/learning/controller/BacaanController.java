@@ -14,7 +14,7 @@ import java.util.UUID;
 public class BacaanController {
 
     @Autowired
-    private BacaanService bacaanService; // Memanggil Service, bukan Repo
+    private BacaanService bacaanService;
 
     @GetMapping
     public List<Bacaan> getAll() {
