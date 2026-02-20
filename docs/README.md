@@ -1,3 +1,12 @@
+## 👥 Anggota Kelompok A15
+- M. Adella Fathir Supriadi (2406495640)
+- Ali Akbar Murthadha (2406495754)
+- Christna Yosua Rotinsulu (2406495691)
+- Nathanael Leander Herdanatra (2406421320)
+- Tirta Rendy Siahaan (2406355621)
+
+
+
 # Cara Setup Aplikasi
 
 - Buka folder `backend` di IntelliJ IDEA Ultimate.
@@ -23,3 +32,6 @@ Contoh:
 Contoh:
 `spring.datasource.username=postgres.xxxxxxxxxxxxxxxxxxxx`
 - `spring.datasource.password=[PASSWORD PROJECT KALIAN]`
+
+# Docs Group Preparation
+Link : <a href="https://docs.google.com/document/d/1qXx9EYBr9EgFPy5gCOpMnVIi1kwDC42dGiQXf2kc2eI/edit?usp=sharing">Prep Group A15</a>
