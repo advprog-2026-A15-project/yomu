@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
+    pmd
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -40,6 +41,38 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-thymeleaf-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+pmd {
+
+    toolVersion = "7.3.0"
+
+    isConsoleOutput = true
+    isIgnoreFailures = false
+
+
+    ruleSets = emptyList()
+
+
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+
+
+    incrementalAnalysis.set(true)
+}
+
+tasks.withType<Pmd>().configureEach {
+
+    exclude("**/build/**", "**/generated/**")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+
+tasks.named("check") {
+    dependsOn("pmdMain", "pmdTest")
 }
 
 tasks.withType<Test> {
