@@ -13,8 +13,9 @@ public class Bacaan {
     @Column(columnDefinition = "UUID")
     private UUID id;
 
+    @Column(nullable = false)
     private String judul;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String isiTeks;
 }
