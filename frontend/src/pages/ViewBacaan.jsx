@@ -41,7 +41,10 @@ export default function ViewBacaan() {
                                 <button className="btn" style={{ backgroundColor: 'var(--blue)', color: 'var(--base)', marginRight: '8px' }}>Edit</button>
                             </Link>
                             <Link to={`/delete/${b.id}`}>
-                                <button className="btn" style={{ backgroundColor: 'var(--red)', color: 'var(--base)' }}>Hapus</button>
+                                <button className="btn" style={{ backgroundColor: 'var(--red)', color: 'var(--base)', marginRight: '8px' }}>Hapus</button>
+                            </Link>
+                            <Link to={`/bacaan/${b.id}`}>
+                                <button className="btn" style={{ backgroundColor: 'var(--lavender)', color: 'var(--base)' }}>Detail</button>
                             </Link>
                         </td>
                     </tr>
