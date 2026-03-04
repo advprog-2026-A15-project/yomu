@@ -120,6 +120,14 @@ export default function DetailBacaan() {
                                 <small style={{ color: 'var(--subtext)' }}>
                                     {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
                                 </small>
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'flex-end' }}>
+                                    <Link to={`/bacaan/${id}/comment/${comment.id}/edit`}>
+                                        <button className="btn" style={{ backgroundColor: 'var(--blue)', color: 'var(--base)', padding: '4px 12px', fontSize: '12px' }}>Edit</button>
+                                    </Link>
+                                    <Link to={`/bacaan/${id}/comment/${comment.id}/delete`}>
+                                        <button className="btn" style={{ backgroundColor: 'var(--red)', color: 'var(--base)', padding: '4px 12px', fontSize: '12px' }}>Hapus</button>
+                                    </Link>
+                                </div>
                             </article>
                         ))}
                     </div>
