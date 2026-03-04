@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.yomu.learning.controller;
 
 import id.ac.ui.cs.advprog.yomu.learning.models.Bacaan;
 import id.ac.ui.cs.advprog.yomu.learning.service.BacaanService;
+import id.ac.ui.cs.advprog.yomu.learning.service.QuizService; // Import Interface Service
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,9 @@ public class BacaanController {
 
     @Autowired
     private BacaanService bacaanService;
+
+    @Autowired
+    private QuizService quizService;
 
     @GetMapping
     public List<Bacaan> getAll() {
@@ -39,5 +43,11 @@ public class BacaanController {
     @PutMapping("/{id}")
     public Bacaan update(@PathVariable UUID id, @RequestBody Bacaan bacaan) {
         return bacaanService.update(id, bacaan);
+    }
+
+    @PostMapping("/{bacaanId}/kuis/submit")
+    public String submitKuis(@PathVariable UUID bacaanId, @RequestBody String jawabanUser) {
+        // Controller HANYA melempar data ke Service, lalu mengembalikan hasilnya
+        return quizService.cekJawabanKuis(bacaanId, jawabanUser);
     }
 }
