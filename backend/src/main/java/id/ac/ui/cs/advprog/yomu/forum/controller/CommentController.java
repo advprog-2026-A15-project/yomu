@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.yomu.forum.controller;
 
+import id.ac.ui.cs.advprog.yomu.forum.dto.CreateCommentRequest;
 import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 import id.ac.ui.cs.advprog.yomu.forum.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class CommentController {
     }
 
     @PostMapping
-    public Comment create(@RequestBody Comment comment) {
-        return commentService.create(comment);
+    public Comment create(@RequestBody CreateCommentRequest request) {
+        return commentService.create(request);
     }
 
     @DeleteMapping("/{id}")

@@ -1,8 +1,10 @@
 package id.ac.ui.cs.advprog.yomu.forum.service;
 
+import id.ac.ui.cs.advprog.yomu.forum.dto.CreateCommentRequest;
 import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 import id.ac.ui.cs.advprog.yomu.forum.repository.CommentRepository;
-import id.ac.ui.cs.advprog.yomu.forum.service.CommentService;
+import id.ac.ui.cs.advprog.yomu.learning.models.Bacaan;
+import id.ac.ui.cs.advprog.yomu.learning.repository.BacaanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +17,21 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentRepository repository;
 
+    @Autowired
+    private BacaanRepository bacaanRepository;
+
     @Override
     public List<Comment> findAll() {
         return repository.findAll();
     }
 
     @Override
-    public Comment create(Comment comment) {
+    public Comment create(CreateCommentRequest request) {
+        Bacaan bacaan = bacaanRepository.findById(request.getBacaanId())
+                .orElseThrow(() -> new RuntimeException("Bacaan tidak ditemukan"));
+        Comment comment = new Comment();
+        comment.setIsiKomentar(request.getIsiKomentar());
+        comment.setBacaan(bacaan);
         return repository.save(comment);
     }
 
