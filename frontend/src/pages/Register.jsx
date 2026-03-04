@@ -20,12 +20,19 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await register(formData);
-      navigate('/');
+        const payload = {
+        username: formData.username,
+        displayName: formData.displayName,
+        email: formData.email || null,        // jika kosong → null
+        phoneNumber: formData.phoneNumber || null,
+        password: formData.password,
+        };
+        await register(payload);
+        navigate('/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registrasi gagal');
+        setError(err.response?.data?.error || 'Registrasi gagal');
     }
-  };
+    };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
