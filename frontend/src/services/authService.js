@@ -48,3 +48,10 @@ export const getCurrentUser = async () => {
     return null;
   }
 };
+
+export const loginWithGoogle = async (idToken) => {
+  const response = await api.post('/auth/oauth2/google', { idToken });
+  const { token } = response.data;
+  setToken(token);
+  return response.data;
+};

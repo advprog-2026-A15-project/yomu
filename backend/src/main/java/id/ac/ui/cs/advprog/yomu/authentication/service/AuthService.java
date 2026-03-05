@@ -1,5 +1,9 @@
 package id.ac.ui.cs.advprog.yomu.authentication.service;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import id.ac.ui.cs.advprog.yomu.authentication.dto.request.*;
 import id.ac.ui.cs.advprog.yomu.authentication.dto.response.AuthResponse;
 import id.ac.ui.cs.advprog.yomu.authentication.dto.response.UserResponse;
@@ -7,6 +11,7 @@ import id.ac.ui.cs.advprog.yomu.authentication.model.Role;
 import id.ac.ui.cs.advprog.yomu.authentication.model.User;
 import id.ac.ui.cs.advprog.yomu.authentication.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +20,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +32,11 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    @Value("${google.client-id}")
+    private String clientId;
+
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // Validasi unik
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already taken");
         }
@@ -44,7 +53,7 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.PELAJAR); // default
+        user.setRole(Role.PELAJAR);
         user.setProvider("local");
 
         user = userRepository.save(user);
@@ -69,24 +78,52 @@ public class AuthService {
 
     @Transactional
     public AuthResponse googleAuth(GoogleAuthRequest request) {
-        // Implementasi verifikasi token Google (dummy di sini, harus diganti dengan verifikasi sesungguhnya)
-        GoogleUserInfo googleUser = verifyGoogleToken(request.getIdToken());
-        if (googleUser == null) {
-            throw new RuntimeException("Invalid Google token");
+        String idTokenString = request.getIdToken();
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(clientId))
+                .build();
+
+        GoogleIdToken idToken;
+        try {
+            idToken = verifier.verify(idTokenString);
+            if (idToken == null) {
+                throw new RuntimeException("Invalid Google token");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to verify Google token", e);
         }
 
-        User user = userRepository.findByProviderAndProviderId("google", googleUser.getSub())
-                .orElseGet(() -> {
-                    User newUser = new User();
-                    newUser.setUsername(googleUser.getEmail()); // sementara email sebagai username (bisa diganti nanti)
-                    newUser.setDisplayName(googleUser.getName());
-                    newUser.setEmail(googleUser.getEmail());
-                    newUser.setProvider("google");
-                    newUser.setProviderId(googleUser.getSub());
-                    newUser.setRole(Role.PELAJAR);
-                    newUser.setPassword(null);
-                    return userRepository.save(newUser);
-                });
+        GoogleIdToken.Payload payload = idToken.getPayload();
+        String userId = payload.getSubject();
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
+
+        User user = userRepository.findByProviderAndProviderId("google", userId)
+                .orElseGet(() -> userRepository.findByEmail(email)
+                        .map(existingUser -> {
+                            existingUser.setProvider("google");
+                            existingUser.setProviderId(userId);
+                            return userRepository.save(existingUser);
+                        })
+                        .orElseGet(() -> {
+                            User newUser = new User();
+                            String username = email.split("@")[0];
+                            int suffix = 1;
+                            String baseUsername = username;
+                            while (userRepository.existsByUsername(username)) {
+                                username = baseUsername + suffix;
+                                suffix++;
+                            }
+                            newUser.setUsername(username);
+                            newUser.setDisplayName(name != null ? name : email);
+                            newUser.setEmail(email);
+                            newUser.setProvider("google");
+                            newUser.setProviderId(userId);
+                            newUser.setRole(Role.PELAJAR);
+                            return userRepository.save(newUser);
+                        }));
 
         String token = jwtService.generateToken(user);
         return mapToAuthResponse(token, user);
@@ -163,32 +200,5 @@ public class AuthService {
         response.setPhoneNumber(user.getPhoneNumber());
         response.setRole(user.getRole().name());
         return response;
-    }
-
-    // Simulasi verifikasi Google token (untuk production, gunakan GoogleTokenVerifier)
-    private GoogleUserInfo verifyGoogleToken(String idToken) {
-        // TODO: Implementasi verifikasi sesungguhnya
-        // Contoh sederhana (hanya untuk demonstrasi):
-        if (idToken == null || idToken.isEmpty()) return null;
-        // Asumsikan token valid dan kita ekstrak informasi
-        GoogleUserInfo info = new GoogleUserInfo();
-        info.setSub("dummy-google-sub-12345");
-        info.setEmail("user@gmail.com");
-        info.setName("Google User");
-        return info;
-    }
-
-    // Inner class untuk menyimpan info dari Google
-    private static class GoogleUserInfo {
-        private String sub;
-        private String email;
-        private String name;
-
-        public String getSub() { return sub; }
-        public void setSub(String sub) { this.sub = sub; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
     }
 }
