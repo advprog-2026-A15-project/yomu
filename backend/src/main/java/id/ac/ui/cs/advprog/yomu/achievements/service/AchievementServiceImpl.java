@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +34,10 @@ public class AchievementServiceImpl implements AchievementService {
 
             userAchievementRepository.save(ua);
         }
+    }
+
+    @Override
+    public List<UserAchievement> getUserAchievements(User user) {
+        return userAchievementRepository.findAllByUserOrderByAchievedAtDesc(user);
     }
 }

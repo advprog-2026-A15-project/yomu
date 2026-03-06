@@ -7,13 +7,17 @@ import './index.css';
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 if (!googleClientId) {
-    throw new Error('Missing VITE_GOOGLE_CLIENT_ID. Add it to frontend/.env.local.');
+    console.warn('VITE_GOOGLE_CLIENT_ID is missing. Google login will be disabled.');
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <GoogleOAuthProvider clientId={googleClientId}>
+        {googleClientId ? (
+            <GoogleOAuthProvider clientId={googleClientId}>
+                <App />
+            </GoogleOAuthProvider>
+        ) : (
             <App />
-        </GoogleOAuthProvider>
+        )}
     </React.StrictMode>
 );
