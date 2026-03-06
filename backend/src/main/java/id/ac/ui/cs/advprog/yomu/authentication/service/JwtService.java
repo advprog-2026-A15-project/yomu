@@ -17,10 +17,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${yomu.jwt.secret}")
+    @Value("${yomu.jwt.secret:01234567890123456789012345678901}")
     private String secret;
 
-    @Value("${yomu.jwt.expiration-ms}")
+    @Value("${yomu.jwt.expiration-ms:86400000}")
     private Long expirationMs;
 
     private Key getSigningKey() {
