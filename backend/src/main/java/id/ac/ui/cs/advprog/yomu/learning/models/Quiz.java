@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.yomu.learning.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,9 +14,9 @@ public class Quiz {
     @Column(columnDefinition = "UUID")
     private UUID id;
 
-    // Menyambungkan kuis ke bacaan tertentu
     @ManyToOne
     @JoinColumn(name = "bacaan_id", nullable = false)
+    @JsonBackReference // Pasangan dari JsonManagedReference di atas
     private Bacaan bacaan;
 
     @Column(columnDefinition = "TEXT", nullable = false)
