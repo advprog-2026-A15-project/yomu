@@ -43,7 +43,8 @@ export default function DeleteConfirmBacaan() {
 
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(text || 'Gagal mengambil data bacaan');
+          setError(text || 'Gagal mengambil data bacaan');
+          return;
         }
 
         const data = await res.json();
@@ -89,8 +90,18 @@ export default function DeleteConfirmBacaan() {
       }
 
       if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'Gagal menghapus bacaan');
+        let text = await res.text();
+        try {
+          const jsonError = JSON.parse(text);
+          if (jsonError.error && jsonError.error.includes('Referential integrity constraint')) {
+            setError('Bacaan tidak dapat dihapus karena masih ada komentar yang terkait. Silakan hapus semua komentar terlebih dahulu.');
+          } else {
+            setError(jsonError.error || 'Gagal menghapus bacaan');
+          }
+        } catch {
+          setError(text || 'Gagal menghapus bacaan');
+        }
+        return;
       }
 
       navigate('/');

@@ -6,7 +6,7 @@ import { getToken } from './services/authService';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
-// Halaman bacaan (asumsi sudah ada)
+// Halaman bacaan
 import ViewBacaan from './pages/ViewBacaan';
 import CreateBacaan from './pages/CreateBacaan';
 import EditBacaan from './pages/EditBacaan';
