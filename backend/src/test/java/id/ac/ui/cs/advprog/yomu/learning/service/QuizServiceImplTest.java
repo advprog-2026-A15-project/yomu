@@ -3,12 +3,15 @@ package id.ac.ui.cs.advprog.yomu.learning.service;
 import id.ac.ui.cs.advprog.yomu.learning.models.Bacaan;
 import id.ac.ui.cs.advprog.yomu.learning.models.Quiz;
 import id.ac.ui.cs.advprog.yomu.learning.repository.QuizRepository;
+import id.ac.ui.cs.advprog.yomu.achievements.service.AchievementService;
+import id.ac.ui.cs.advprog.yomu.authentication.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,12 @@ class QuizServiceImplTest {
     @Mock
     private QuizRepository quizRepository;
 
+    @Mock
+    private AchievementService achievementService;
+
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private QuizServiceImpl quizService;
 
@@ -31,6 +40,8 @@ class QuizServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        SecurityContextHolder.clearContext();
+
         bacaanId = UUID.randomUUID();
 
         Bacaan dummyBacaan = new Bacaan();

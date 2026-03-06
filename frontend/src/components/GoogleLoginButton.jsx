@@ -4,6 +4,11 @@ import { loginWithGoogle } from '../services/authService';
 
 export default function GoogleLoginButton() {
   const navigate = useNavigate();
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  if (!googleClientId) {
+    return null;
+  }
 
   const handleSuccess = async (credentialResponse) => {
     try {

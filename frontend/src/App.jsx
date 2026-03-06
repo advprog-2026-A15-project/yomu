@@ -15,6 +15,8 @@ import DetailBacaan from './pages/DetailBacaan';
 import CreateComment from './pages/CreateComment';
 import EditComment from './pages/EditComment';
 import DeleteConfirmComment from './pages/DeleteConfirmComment';
+import Achievements from './pages/Achievements';
+import Clans from './pages/Clans';
 
 import './App.css';
 
@@ -55,6 +57,8 @@ function App() {
         <Route path="/bacaan/:bacaanId/comment/new" element={<ProtectedRoute><CreateComment /></ProtectedRoute>} />
         <Route path="/bacaan/:bacaanId/comment/:commentId/edit" element={<ProtectedRoute><EditComment /></ProtectedRoute>} />
         <Route path="/bacaan/:bacaanId/comment/:commentId/delete" element={<ProtectedRoute><DeleteConfirmComment /></ProtectedRoute>} />
+        <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+        <Route path="/clans" element={<ProtectedRoute><Clans /></ProtectedRoute>} />
 
 
         {/* Fallback */}
