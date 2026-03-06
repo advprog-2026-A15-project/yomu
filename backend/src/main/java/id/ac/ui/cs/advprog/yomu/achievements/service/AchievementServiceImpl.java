@@ -1,21 +1,28 @@
+package id.ac.ui.cs.advprog.yomu.achievements.service;
+
+import id.ac.ui.cs.advprog.yomu.achievements.model.Achievement;
+import id.ac.ui.cs.advprog.yomu.achievements.model.UserAchievement;
+import id.ac.ui.cs.advprog.yomu.achievements.repository.AchievementRepository;
+import id.ac.ui.cs.advprog.yomu.achievements.repository.UserAchievementRepository;
+import id.ac.ui.cs.advprog.yomu.authentication.model.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
 @Service
+@RequiredArgsConstructor
 public class AchievementServiceImpl implements AchievementService {
 
     private final AchievementRepository achievementRepository;
     private final UserAchievementRepository userAchievementRepository;
-
-    public AchievementServiceImpl(AchievementRepository achievementRepository,
-                                  UserAchievementRepository userAchievementRepository) {
-        this.achievementRepository = achievementRepository;
-        this.userAchievementRepository = userAchievementRepository;
-    }
 
     @Override
     public void unlockFirstReadAchievement(User user) {
 
         Achievement achievement = achievementRepository
                 .findByName("First Read")
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Achievement tidak ditemukan"));
 
         if (!userAchievementRepository.existsByUserAndAchievement(user, achievement)) {
 
