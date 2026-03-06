@@ -11,6 +11,10 @@ import ViewBacaan from './pages/ViewBacaan';
 import CreateBacaan from './pages/CreateBacaan';
 import EditBacaan from './pages/EditBacaan';
 import DeleteConfirmBacaan from './pages/DeleteConfirmBacaan';
+import DetailBacaan from './pages/DetailBacaan';
+import CreateComment from './pages/CreateComment';
+import EditComment from './pages/EditComment';
+import DeleteConfirmComment from './pages/DeleteConfirmComment';
 
 import './App.css';
 

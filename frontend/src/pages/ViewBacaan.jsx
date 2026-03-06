@@ -130,9 +130,32 @@ export default function ViewBacaan() {
                     </Link>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                {bacaans.map(b => (
+                    <tr key={b.id}>
+                        <td className="col-id" title={b.id}>{b.id}</td>
+                        <td title={b.judul}><strong>{b.judul.length > 40
+                            ? b.judul.substring(0, 40) + "..."
+                            : b.judul}</strong></td>
+                        <td title={b.isiTeks}>{b.isiTeks.length > 80
+                            ? b.isiTeks.substring(0, 80) + "..."
+                            : b.isiTeks}</td>
+                        <td style={{ textAlign: 'center', display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'nowrap' }}>
+                            <Link to={`/edit/${b.id}`}>
+                                <button className="btn" style={{ backgroundColor: 'var(--blue)', color: 'var(--base)' }}>Edit</button>
+                            </Link>
+                            <Link to={`/delete/${b.id}`}>
+                                <button className="btn" style={{ backgroundColor: 'var(--red)', color: 'var(--base)' }}>Hapus</button>
+                            </Link>
+                            <Link to={`/bacaan/${b.id}`}>
+                                <button className="btn" style={{ backgroundColor: 'var(--lavender)', color: 'var(--base)' }}>Detail</button>
+                            </Link>
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
         </div>
       )}
     </div>
