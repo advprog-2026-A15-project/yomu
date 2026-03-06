@@ -5,7 +5,8 @@
 - Nathanael Leander Herdanatra (2406421320)
 - Tirta Rendy Siahaan (2406355621)
 
-
+## 🌐 URL Deployment
+- http://3.229.117.61/
 
 ## 🖥️ Cara Setup Aplikasi
 
@@ -248,3 +249,4 @@ https://developers.google.com/identity/protocols/oauth2
 
 Spring Security OAuth2  
 https://docs.spring.io/spring-security/reference/servlet/oauth2/login
+
