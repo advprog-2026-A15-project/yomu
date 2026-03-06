@@ -159,6 +159,11 @@ spring:
               - profile
 ```
 
+## Setting Frontend
+
+1. Copy `.env.example` di folder frontend ke `.env.local`.
+2. Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi CLIENT_ID sebelumnya.
+
 ---
 
 # 6. Alur OAuth2 Login
