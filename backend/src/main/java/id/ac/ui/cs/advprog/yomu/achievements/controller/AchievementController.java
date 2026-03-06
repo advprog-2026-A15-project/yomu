@@ -1,5 +1,9 @@
+package id.ac.ui.cs.advprog.yomu.achievements.controller;
+
+import org.springframework.web.bind.annotation.*;
+
 @RestController
-@RequestMapping("/achievements")
+@RequestMapping("/api/achievements")
 public class AchievementController {
 
 }
