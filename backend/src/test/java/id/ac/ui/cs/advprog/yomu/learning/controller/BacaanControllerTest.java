@@ -3,11 +3,14 @@ package id.ac.ui.cs.advprog.yomu.learning.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.yomu.learning.models.Bacaan;
 import id.ac.ui.cs.advprog.yomu.learning.service.BacaanService;
+import id.ac.ui.cs.advprog.yomu.learning.service.QuizService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.InjectMocks;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -36,6 +39,12 @@ class BacaanControllerTest {
     @Mock
     private BacaanService bacaanService;
 
+    @Mock
+    private QuizService quizService;
+
+    @InjectMocks
+    private BacaanController bacaanController;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Bacaan bacaan;
@@ -51,9 +60,16 @@ class BacaanControllerTest {
 
         // Create controller instance and inject mock service via reflection
         BacaanController controller = new BacaanController();
+
         Field serviceField = BacaanController.class.getDeclaredField("bacaanService");
         serviceField.setAccessible(true);
         serviceField.set(controller, bacaanService);
+
+        // 👇 INI YANG AKU TAMBAHKAN AGAR QUIZ BISA JALAN 👇
+        Field quizServiceField = BacaanController.class.getDeclaredField("quizService");
+        quizServiceField.setAccessible(true);
+        quizServiceField.set(controller, quizService);
+        // 👆 ------------------------------------------- 👆
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
@@ -115,5 +131,16 @@ class BacaanControllerTest {
 
         mockMvc.perform(delete("/api/bacaan/{id}", id))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void submitKuis() throws Exception {
+        when(quizService.cekJawabanKuis(eq(id), anyString())).thenReturn("Benar! Kuis selesai.");
+
+        mockMvc.perform(post("/api/bacaan/{bacaanId}/kuis/submit", id)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("jawaban yang benar"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Benar! Kuis selesai."));
     }
 }
