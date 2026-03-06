@@ -141,6 +141,9 @@ export default function DetailBacaan() {
                 }}
               >
                 <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{comment.isiKomentar}</p>
+                <small style={{ color: 'var(--subtext0)', display: 'block' }}>
+                  By: <strong>{comment.username || 'Unknown'}</strong>
+                </small>
                 <small style={{ color: 'var(--subtext0)' }}>
                   {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
                 </small>
