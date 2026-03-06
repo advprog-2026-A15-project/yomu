@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { logout, getToken } from "../services/authService";
+import { logout, getToken } from '../services/authService';
+
+const truncate = (value, maxLength) => {
+  if (!value) return '-';
+  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+};
 
 export default function ViewBacaan() {
   const [bacaans, setBacaans] = useState([]);
@@ -10,7 +15,7 @@ export default function ViewBacaan() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate('/login');
   };
 
   useEffect(() => {
@@ -18,28 +23,27 @@ export default function ViewBacaan() {
     const token = getToken();
 
     if (!token) {
-      // kalau tidak ada token, arahkan ke login
-      navigate("/login");
+      navigate('/login');
       return;
     }
 
     async function load() {
       setLoading(true);
       setError(null);
+
       try {
-        const res = await fetch("http://localhost:8080/api/bacaan", {
+        const res = await fetch('http://localhost:8080/api/bacaan', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          signal: controller.signal
+          signal: controller.signal,
         });
 
         if (res.status === 401 || res.status === 403) {
-          // token invalid atau expired -> logout dan redirect
           logout();
-          navigate("/login");
+          navigate('/login');
           return;
         }
 
@@ -52,8 +56,8 @@ export default function ViewBacaan() {
         setBacaans(Array.isArray(data) ? data : []);
       } catch (err) {
         if (err.name !== 'AbortError') {
-          console.error("Load bacaan error:", err);
-          setError(err.message || "Terjadi kesalahan saat memuat data");
+          console.error('Load bacaan error:', err);
+          setError(err.message || 'Terjadi kesalahan saat memuat data');
         }
       } finally {
         setLoading(false);
@@ -61,102 +65,58 @@ export default function ViewBacaan() {
     }
 
     load();
-
     return () => controller.abort();
   }, [navigate]);
 
   return (
-    <div className="page-container" style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
-        <h1 style={{ color: 'var(--lavender)', margin: 0 }}>Yomu: Daftar Bacaan</h1>
-
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+    <div className="page-container">
+      <header className="page-header">
+        <h1 className="page-title">Yomu: Daftar Bacaan</h1>
+        <div className="header-actions">
           <Link to="/create">
-            <button className="btn" style={{ backgroundColor: 'var(--green)', color: 'var(--base)' }}>+ Tambah</button>
+            <button className="btn btn-add" type="button">+ Tambah</button>
           </Link>
-
-          <button
-            className="btn"
-            onClick={handleLogout}
-            style={{ backgroundColor: 'transparent', color: 'var(--muted)', border: '1px solid transparent', cursor: 'pointer' }}
-            title="Logout"
-          >
+          <button className="btn btn-ghost" onClick={handleLogout} type="button" title="Logout">
             Logout
           </button>
         </div>
-      </div>
+      </header>
 
-      {loading && <div style={{ padding: 12 }}>Memuat bacaan...</div>}
-      {error && <div style={{ color: '#b00020', padding: 12 }}>{error}</div>}
+      {loading && <div className="status-note">Memuat bacaan...</div>}
+      {error && <div className="status-error">{error}</div>}
 
       {!loading && !error && (
-        <div style={{ overflowX: 'auto' }}>
-          <table className="macchiato-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th className="col-id">UUID</th>
-                <th>Judul</th>
-                <th>Konten</th>
-                <th style={{ width: 180, textAlign: 'center' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bacaans.length === 0 && (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: 16, color: 'var(--muted)' }}>
-                    Belum ada bacaan.
-                  </td>
-                </tr>
-              )}
-              {bacaans.map(b => (
-                <tr key={b.id}>
-                  <td className="col-id" title={b.id} style={{ padding: '8px 12px', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {b.id}
-                  </td>
-                  <td title={b.judul} style={{ padding: '8px 12px' }}>
-                    <strong>
-                      {b.judul?.length > 40 ? b.judul.substring(0, 40) + "..." : b.judul}
-                    </strong>
-                  </td>
-                  <td title={b.isiTeks} style={{ padding: '8px 12px' }}>
-                    {b.isiTeks?.length > 80 ? b.isiTeks.substring(0, 80) + "..." : b.isiTeks}
-                  </td>
-                  <td style={{ textAlign: 'center', padding: '8px 12px' }}>
-                    <Link to={`/edit/${b.id}`}>
-                      <button className="btn" style={{ backgroundColor: 'var(--blue)', color: 'var(--base)', marginRight: 8 }}>Edit</button>
-                    </Link>
-                    <Link to={`/delete/${b.id}`}>
-                      <button className="btn" style={{ backgroundColor: 'var(--red)', color: 'var(--base)' }}>Hapus</button>
-                    </Link>
-                  </td>
-                </tr>
-                </thead>
-                <tbody>
-                {bacaans.map(b => (
-                    <tr key={b.id}>
-                        <td className="col-id" title={b.id}>{b.id}</td>
-                        <td title={b.judul}><strong>{b.judul.length > 40
-                            ? b.judul.substring(0, 40) + "..."
-                            : b.judul}</strong></td>
-                        <td title={b.isiTeks}>{b.isiTeks.length > 80
-                            ? b.isiTeks.substring(0, 80) + "..."
-                            : b.isiTeks}</td>
-                        <td style={{ textAlign: 'center', display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'nowrap' }}>
-                            <Link to={`/edit/${b.id}`}>
-                                <button className="btn" style={{ backgroundColor: 'var(--blue)', color: 'var(--base)' }}>Edit</button>
-                            </Link>
-                            <Link to={`/delete/${b.id}`}>
-                                <button className="btn" style={{ backgroundColor: 'var(--red)', color: 'var(--base)' }}>Hapus</button>
-                            </Link>
-                            <Link to={`/bacaan/${b.id}`}>
-                                <button className="btn" style={{ backgroundColor: 'var(--lavender)', color: 'var(--base)' }}>Detail</button>
-                            </Link>
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
+        <section className="thread-list" aria-label="Daftar Bacaan">
+          {bacaans.length === 0 && <div className="status-note">Belum ada bacaan.</div>}
+
+          {bacaans.map((b) => (
+            <article className="thread-item" key={b.id}>
+              <div className="thread-content">
+                <div className="thread-meta" title={b.id}>
+                  UUID: {b.id}
+                </div>
+                <h2 className="thread-title" title={b.judul || '-'}>
+                  {truncate(b.judul, 72)}
+                </h2>
+                <p className="thread-excerpt" title={b.isiTeks || '-'}>
+                  {truncate(b.isiTeks, 180)}
+                </p>
+              </div>
+
+              <div className="thread-actions">
+                <Link to={`/bacaan/${b.id}`}>
+                  <button className="btn btn-detail" type="button">Detail</button>
+                </Link>
+                <Link to={`/edit/${b.id}`}>
+                  <button className="btn btn-edit" type="button">Edit</button>
+                </Link>
+                <Link to={`/delete/${b.id}`}>
+                  <button className="btn btn-delete" type="button">Hapus</button>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </section>
       )}
     </div>
   );

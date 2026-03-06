@@ -15,7 +15,7 @@ export default function GoogleLoginButton() {
   };
 
   return (
-    <div className="w-full flex justify-center">
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
       <GoogleLogin
         onSuccess={handleSuccess}
         onError={() => console.error('Google login failed')}
