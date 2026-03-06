@@ -1,18 +1,24 @@
-/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #24273a; /* Catppuccin Base */
-  color: #cad3f5;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  width: 100%;
-  min-height: 100vh;
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
-#root {
-  width: 100%;
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--base, #24273a);
+  color: var(--text, #cad3f5);
+  line-height: 1.4;
+}
+
+a {
+  color: inherit;
 }
