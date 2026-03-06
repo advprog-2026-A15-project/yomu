@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.yomu.forum.controller;
 
+import id.ac.ui.cs.advprog.yomu.forum.dto.CommentResponse;
 import id.ac.ui.cs.advprog.yomu.forum.dto.CreateCommentRequest;
 import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 import id.ac.ui.cs.advprog.yomu.forum.service.CommentService;
@@ -18,7 +19,7 @@ public class CommentController {
     private CommentService commentService;
 
     @GetMapping
-    public List<Comment> getAll() {
+    public List<CommentResponse> getAll() {
         return commentService.findAll();
     }
 
