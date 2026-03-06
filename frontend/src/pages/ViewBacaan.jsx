@@ -21,7 +21,6 @@ export default function ViewBacaan() {
   useEffect(() => {
     const controller = new AbortController();
     const token = getToken();
-
     if (!token) {
       navigate('/login');
       return;
@@ -104,6 +103,9 @@ export default function ViewBacaan() {
               </div>
 
               <div className="thread-actions">
+                <Link to={`/baca/${b.id}`}>
+                  <button className="btn btn-detail" type="button">Baca & Kuis</button>
+                </Link>
                 <Link to={`/bacaan/${b.id}`}>
                   <button className="btn btn-detail" type="button">Detail</button>
                 </Link>
