@@ -6,6 +6,9 @@
 - Tirta Rendy Siahaan (2406355621)
 
 
+## 🌐 Deployment Link
+
+[http://3.229.117.61/](http://3.229.117.61/)
 
 ## 🖥️ Cara Setup Aplikasi
 
