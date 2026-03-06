@@ -57,6 +57,10 @@ export default function DetailBacaanKuis() {
                 {/* Bagian Kuis POC */}
                 <div style={{ marginTop: '40px', padding: '20px', backgroundColor: 'var(--surface0)', borderRadius: '8px' }}>
                     <h3 style={{ color: 'var(--peach, orange)', marginBottom: '15px' }}>Kuis Pemahaman</h3>
+                    <p style={{ color: 'var(--text)', fontSize: '18px', marginBottom: '15px' }}>
+                        {/* Mengambil elemen kuis pertama (indeks 0) dari array quizzes */}
+                        {bacaan.quizzes?.[0]?.pertanyaan || "⚠️ Pertanyaan belum terkirim dari Backend API"}
+                    </p>
 
                     {hasilKuis && (
                         <div style={{
