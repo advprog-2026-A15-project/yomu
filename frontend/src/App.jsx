@@ -3,6 +3,7 @@ import ViewBacaan from './pages/ViewBacaan';
 import CreateBacaan from './pages/CreateBacaan';
 import EditBacaan from "./pages/EditBacaan.jsx";
 import DeleteConfirmBacaan from './pages/DeleteConfirmBacaan';
+import DetailBacaanKuis from './pages/DetailBacaanKuis';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
                 <Route path="/create" element={<CreateBacaan />} />
                 <Route path="/edit/:id" element={<EditBacaan />} />
                 <Route path="/delete/:id" element={<DeleteConfirmBacaan />} />
+                <Route path="/baca/:id" element={<DetailBacaanKuis />} />
             </Routes>
         </Router>
     );

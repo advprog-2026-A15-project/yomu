@@ -37,6 +37,9 @@ export default function ViewBacaan() {
                             ? b.isiTeks.substring(0, 80) + "..."
                             : b.isiTeks}</td>
                         <td style={{ textAlign: 'center' }}>
+                            <Link to={`/baca/${b.id}`}>
+                                <button className="btn" style={{ backgroundColor: 'var(--peach, orange)', color: 'var(--base)', marginRight: '8px' }}>Baca & Kuis</button>
+                            </Link>
                             <Link to={`/edit/${b.id}`}>
                                 <button className="btn" style={{ backgroundColor: 'var(--blue)', color: 'var(--base)', marginRight: '8px' }}>Edit</button>
                             </Link>
