@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.yomu.learning.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,4 +27,9 @@ public class Bacaan {
     @OneToMany(mappedBy = "bacaan", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference // Mencegah infinite loop (JSON muter-muter)
     private List<Quiz> quizzes;
+
+    // Relasi ke Comment dengan cascade delete
+    @JsonIgnore
+    @OneToMany(mappedBy = "bacaan", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> comments;
 }

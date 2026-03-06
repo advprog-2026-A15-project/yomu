@@ -6,12 +6,11 @@ import { getToken } from './services/authService';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
-// Halaman bacaan (asumsi sudah ada)
+// Halaman bacaan
 import ViewBacaan from './pages/ViewBacaan';
 import CreateBacaan from './pages/CreateBacaan';
 import EditBacaan from './pages/EditBacaan';
 import DeleteConfirmBacaan from './pages/DeleteConfirmBacaan';
-import DetailBacaanKuis from './pages/DetailBacaanKuis';
 import DetailBacaan from './pages/DetailBacaan';
 import CreateComment from './pages/CreateComment';
 import EditComment from './pages/EditComment';
@@ -40,17 +39,6 @@ const AuthRoute = ({ children }) => {
 };
 
 function App() {
-    return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<ViewBacaan />} />
-                <Route path="/create" element={<CreateBacaan />} />
-                <Route path="/edit/:id" element={<EditBacaan />} />
-                <Route path="/delete/:id" element={<DeleteConfirmBacaan />} />
-                <Route path="/baca/:id" element={<DetailBacaanKuis />} />
-            </Routes>
-        </Router>
-    );
   return (
     <Router>
       <Routes>
