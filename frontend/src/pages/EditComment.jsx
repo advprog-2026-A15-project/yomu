@@ -1,40 +1,77 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { getToken } from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
 export default function EditComment() {
-    const { id, bacaanId } = useParams();
+    const { commentId, bacaanId } = useParams();
     const navigate = useNavigate();
     const [isiKomentar, setIsiKomentar] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        fetch(`${API_BASE}/api/comment/${id}`)
+        const token = getToken();
+
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
+        fetch(`${API_BASE}/api/comment/${commentId}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
             .then((res) => {
+                if (res.status === 401 || res.status === 403) {
+                    navigate('/login');
+                    return null;
+                }
+
                 if (!res.ok) {
                     throw new Error('Komentar tidak ditemukan');
                 }
                 return res.json();
             })
-            .then((data) => setIsiKomentar(data.isiKomentar || ''))
+            .then((data) => {
+                if (data) {
+                    setIsiKomentar(data.isiKomentar || '');
+                }
+            })
             .catch((err) => setError(err.message || 'Gagal memuat komentar'));
-    }, [id]);
+    }, [commentId, navigate]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
+
+        const token = getToken();
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
         setIsSubmitting(true);
 
-        fetch(`${API_BASE}/api/comment/${id}`, {
+        fetch(`${API_BASE}/api/comment/${commentId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
             body: JSON.stringify({
                 isiKomentar
             })
         })
             .then((res) => {
+                if (res.status === 401 || res.status === 403) {
+                    navigate('/login');
+                    return;
+                }
+
                 if (!res.ok) {
                     throw new Error('Gagal memperbarui komentar');
                 }
@@ -74,4 +111,3 @@ export default function EditComment() {
         </div>
     );
 }
-

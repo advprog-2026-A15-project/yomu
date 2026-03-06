@@ -52,9 +52,9 @@ function App() {
         <Route path="/edit/:id" element={<ProtectedRoute><EditBacaan /></ProtectedRoute>} />
         <Route path="/delete/:id" element={<ProtectedRoute><DeleteConfirmBacaan /></ProtectedRoute>} />
         <Route path="/bacaan/:id" element={<ProtectedRoute><DetailBacaan /></ProtectedRoute>} />
-        <Route path="/bacaan/:id/comment/new" element={<ProtectedRoute><CreateComment /></ProtectedRoute>} />
-        <Route path="/bacaan/:bacaanId/comment/:id/edit" element={<ProtectedRoute><EditComment /></ProtectedRoute>} />
-        <Route path="/bacaan/:bacaanId/comment/:id/delete" element={<ProtectedRoute><DeleteConfirmComment /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/comment/new" element={<ProtectedRoute><CreateComment /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/comment/:commentId/edit" element={<ProtectedRoute><EditComment /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/comment/:commentId/delete" element={<ProtectedRoute><DeleteConfirmComment /></ProtectedRoute>} />
 
 
         {/* Fallback */}

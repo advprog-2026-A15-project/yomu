@@ -1,20 +1,38 @@
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
+import { getToken } from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
 export default function DeleteConfirmComment() {
-    const { id, bacaanId } = useParams();
+    const { commentId, bacaanId } = useParams();
     const navigate = useNavigate();
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState('');
 
     const handleDelete = () => {
+        const token = getToken();
+
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
         setIsDeleting(true);
         setError('');
 
-        fetch(`${API_BASE}/api/comment/${id}`, { method: 'DELETE' })
+        fetch(`${API_BASE}/api/comment/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
             .then((res) => {
+                if (res.status === 401 || res.status === 403) {
+                    navigate('/login');
+                    return;
+                }
+
                 if (!res.ok) {
                     throw new Error('Gagal menghapus komentar');
                 }
@@ -52,4 +70,3 @@ export default function DeleteConfirmComment() {
         </div>
     );
 }
-
