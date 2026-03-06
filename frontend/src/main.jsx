@@ -1,10 +1,23 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import App from './App';
+import './index.css';
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+if (!googleClientId) {
+    console.warn('VITE_GOOGLE_CLIENT_ID is missing. Google login will be disabled.');
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+        {googleClientId ? (
+            <GoogleOAuthProvider clientId={googleClientId}>
+                <App />
+            </GoogleOAuthProvider>
+        ) : (
+            <App />
+        )}
+    </React.StrictMode>
+);

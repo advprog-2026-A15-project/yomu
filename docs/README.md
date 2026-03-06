@@ -5,8 +5,10 @@
 - Nathanael Leander Herdanatra (2406421320)
 - Tirta Rendy Siahaan (2406355621)
 
-## 🌐 URL Deployment
-- http://3.229.117.61/
+
+## 🌐 Deployment Link
+
+[http://3.229.117.61/](http://3.229.117.61/)
 
 ## 🖥️ Cara Setup Aplikasi
 
@@ -159,6 +161,11 @@ spring:
               - email
               - profile
 ```
+
+## Setting Frontend
+
+1. Copy `.env.example` di folder frontend ke `.env.local`.
+2. Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi CLIENT_ID sebelumnya.
 
 ---
 
