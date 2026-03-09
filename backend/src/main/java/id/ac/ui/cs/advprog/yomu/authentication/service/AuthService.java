@@ -32,7 +32,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    @Value("${google.client-id}")
+    @Value("${google.client-id:dummy-google-client-id}")
     private String clientId;
 
     @Transactional
@@ -174,6 +174,9 @@ public class AuthService {
 
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User belum login");
+        }
         String username = authentication.getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

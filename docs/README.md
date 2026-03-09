@@ -6,6 +6,9 @@
 - Tirta Rendy Siahaan (2406355621)
 
 
+## 🌐 Deployment Link
+
+[http://3.229.117.61/](http://3.229.117.61/)
 
 ## 🖥️ Cara Setup Aplikasi
 
@@ -159,6 +162,11 @@ spring:
               - profile
 ```
 
+## Setting Frontend
+
+1. Copy `.env.example` di folder frontend ke `.env.local`.
+2. Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi CLIENT_ID sebelumnya.
+
 ---
 
 # 6. Alur OAuth2 Login
@@ -248,3 +256,4 @@ https://developers.google.com/identity/protocols/oauth2
 
 Spring Security OAuth2  
 https://docs.spring.io/spring-security/reference/servlet/oauth2/login
+

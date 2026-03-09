@@ -73,6 +73,12 @@ export default function ViewBacaan() {
       <header className="page-header">
         <h1 className="page-title">Yomu: Daftar Bacaan</h1>
         <div className="header-actions">
+          <Link to="/achievements">
+            <button className="btn btn-detail" type="button">Achievement</button>
+          </Link>
+          <Link to="/clans">
+            <button className="btn btn-edit" type="button">Clan</button>
+          </Link>
           <Link to="/create">
             <button className="btn btn-add" type="button">+ Tambah</button>
           </Link>
