@@ -11,7 +11,12 @@
 ## 🖥️ Cara Setup Aplikasi
 
 - Buka folder `backend` di IntelliJ IDEA Ultimate.
+- Lakukan setup Google OAuth2 Login sesuai docs di bawah.
 - Copy [`yomu/backend/src/main/resources/application.properties.example`](../backend/src/main/resources/application.properties.example) ke `yomu/backend/src/main/resources/application.properties`.
+- Isi [YOMU SECRET] dengan token JWT random yang bisa diperoleh [di sini.](https://randomkeygen.com/jwt-secret)
+- Isi [CLIENT ID] dan [CLIENT SECRET] dengan nilai yang diperoleh setelah setup Google OAuth2.
+- Copy [`frontend/.env.example`](../frontend/.env.example) di folder frontend ke `frontend/.env.local`.
+- Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi [CLIENT ID] sebelumnya.
 - Jalankan/run BackendApplication (tombol segitiga hijau).
 - Buka folder `frontend` di terminal.
 - Pastikan terinstall NodeJS v24.13.1.
@@ -142,30 +147,6 @@ Simpan kedua nilai tersebut.
 
 ---
 
-# 5. Konfigurasi Spring Boot
-
-Tambahkan konfigurasi berikut pada file **application.yml**
-
-```yaml
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: YOUR_GOOGLE_CLIENT_ID
-            client-secret: YOUR_GOOGLE_CLIENT_SECRET
-            scope:
-              - email
-              - profile
-```
-
-## Setting Frontend
-
-1. Copy `.env.example` di folder frontend ke `.env.local`.
-2. Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi CLIENT_ID sebelumnya.
-
----
 
 # 6. Alur OAuth2 Login
 
