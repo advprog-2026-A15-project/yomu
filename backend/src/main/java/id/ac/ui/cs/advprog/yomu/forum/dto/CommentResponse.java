@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -14,5 +16,7 @@ public class CommentResponse {
     private UUID bacaanId;
     private String username;
     private LocalDateTime createdAt;
+    private UUID parentId;
+    private List<CommentResponse> replies = new ArrayList<>();
 }
 

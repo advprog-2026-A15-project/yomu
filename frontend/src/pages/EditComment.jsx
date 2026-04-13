@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getToken } from '../services/authService';
+import {useEffect, useState} from 'react';
+import {Link, useNavigate, useParams} from 'react-router-dom';
+import {getToken} from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
 export default function EditComment() {
-    const { commentId, bacaanId } = useParams();
+    const {commentId, bacaanId} = useParams();
     const navigate = useNavigate();
     const [isiKomentar, setIsiKomentar] = useState('');
     const [error, setError] = useState('');
@@ -82,14 +82,15 @@ export default function EditComment() {
     };
 
     return (
-        <div className="page-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <div className="page-container" style={{alignItems: 'center', justifyContent: 'center'}}>
             <div className="form-card">
-                <Link to={`/bacaan/${bacaanId}`} style={{ color: 'var(--blue)', textDecoration: 'none' }}>← Kembali ke detail</Link>
-                <h2 style={{ color: 'var(--lavender)', margin: '20px 0' }}>Edit Komentar</h2>
+                <Link to={`/bacaan/${bacaanId}`} style={{color: 'var(--blue)', textDecoration: 'none'}}>← Kembali ke
+                    detail</Link>
+                <h2 style={{color: 'var(--lavender)', margin: '20px 0'}}>Edit Komentar</h2>
 
-                {error ? <p style={{ color: 'var(--red)' }}>{error}</p> : null}
+                {error ? <p style={{color: 'var(--red)'}}>{error}</p> : null}
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <form onSubmit={handleSubmit} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
                     <textarea
                         className="input-entry"
                         rows="6"
@@ -101,7 +102,7 @@ export default function EditComment() {
                     <button
                         type="submit"
                         className="btn"
-                        style={{ backgroundColor: 'var(--blue)', color: 'var(--base)' }}
+                        style={{backgroundColor: 'var(--blue)', color: 'var(--base)'}}
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}

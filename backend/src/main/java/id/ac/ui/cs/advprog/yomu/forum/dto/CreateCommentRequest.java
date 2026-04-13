@@ -1,25 +1,15 @@
 package id.ac.ui.cs.advprog.yomu.forum.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
+@Getter
+@Setter
 public class CreateCommentRequest {
     private String isiKomentar;
     private UUID bacaanId;
-
-    public String getIsiKomentar() {
-        return isiKomentar;
-    }
-
-    public void setIsiKomentar(String isiKomentar) {
-        this.isiKomentar = isiKomentar;
-    }
-
-    public UUID getBacaanId() {
-        return bacaanId;
-    }
-
-    public void setBacaanId(UUID bacaanId) {
-        this.bacaanId = bacaanId;
-    }
+    private UUID parentCommentId;
 }
 

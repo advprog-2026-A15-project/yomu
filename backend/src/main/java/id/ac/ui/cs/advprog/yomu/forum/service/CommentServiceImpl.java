@@ -14,12 +14,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository repository;
@@ -44,6 +46,14 @@ public class CommentServiceImpl implements CommentService {
         comment.setIsiKomentar(request.getIsiKomentar());
         comment.setBacaan(bacaan);
         comment.setUser(user);
+
+        // Cek apakah ini merupakan balasan dari komentar lain
+        if (request.getParentCommentId() != null) {
+            Comment parent = repository.findById(request.getParentCommentId())
+                    .orElseThrow(() -> new RuntimeException("Komentar induk tidak ditemukan"));
+            comment.setParentComment(parent);
+        }
+
         return repository.save(comment);
     }
 
@@ -91,6 +101,16 @@ public class CommentServiceImpl implements CommentService {
         response.setBacaanId(comment.getBacaanId());
         response.setUsername(comment.getUser() != null ? comment.getUser().getUsername() : "Unknown");
         response.setCreatedAt(comment.getCreatedAt());
+        response.setParentId(comment.getParentId());
+
+        // Mapping balasan (replies) secara rekursif
+        if (comment.getReplies() != null && !comment.getReplies().isEmpty()) {
+            List<CommentResponse> replyResponses = comment.getReplies().stream()
+                    .map(this::mapToCommentResponse) // Pemanggilan rekursif
+                    .toList();
+            response.setReplies(replyResponses);
+        }
+
         return response;
     }
 }

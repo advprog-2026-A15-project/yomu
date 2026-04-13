@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface ClanMemberRepository extends JpaRepository<ClanMember, Long> {
     boolean existsByClanAndUser(Clan clan, User user);
+
     long countByClan(Clan clan);
+
     List<ClanMember> findAllByUser(User user);
 }
