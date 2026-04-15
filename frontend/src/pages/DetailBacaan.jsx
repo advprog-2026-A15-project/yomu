@@ -15,6 +15,7 @@ export default function DetailBacaan() {
   const [myAchievements, setMyAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const unlockedAchievements = myAchievements.filter((achievement) => achievement?.unlocked);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -220,11 +221,11 @@ export default function DetailBacaan() {
         ) : null}
 
         <p style={{ marginTop: '16px', marginBottom: '6px', color: 'var(--subtext0)' }}>Achievement saya:</p>
-        {myAchievements.length === 0 ? (
-          <p style={{ margin: 0 }}>Belum ada achievement.</p>
+        {unlockedAchievements.length === 0 ? (
+          <p style={{ margin: 0 }}>Belum ada achievement yang terbuka.</p>
         ) : (
           <ul style={{ margin: 0, paddingLeft: '18px' }}>
-            {myAchievements.map((achievement) => (
+            {unlockedAchievements.map((achievement) => (
               <li key={achievement.achievementId}>
                 {achievement.name} - {achievement.description}
               </li>

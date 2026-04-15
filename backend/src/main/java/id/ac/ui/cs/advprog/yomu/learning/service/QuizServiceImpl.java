@@ -45,7 +45,7 @@ public class QuizServiceImpl implements QuizService {
         String normalizedCorrectAnswer = kuis.getJawabanBenar().toLowerCase(Locale.ROOT);
 
         if (normalizedUserAnswer.contains(normalizedCorrectAnswer)) {
-            getAuthenticatedUser().ifPresent(achievementService::unlockFirstReadAchievement);
+            getAuthenticatedUser().ifPresent(user -> achievementService.recordCompletedReading(user, bacaanId));
             return "Benar! Kuis selesai.";
         } else {
             return "Salah! Silakan coba lagi.";
