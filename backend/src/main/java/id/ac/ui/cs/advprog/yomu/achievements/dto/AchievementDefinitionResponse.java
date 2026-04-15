@@ -3,13 +3,11 @@ package id.ac.ui.cs.advprog.yomu.achievements.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @AllArgsConstructor
-public class UserAchievementResponse {
-    private Long achievementId;
+public class AchievementDefinitionResponse {
+    private Long id;
     private String name;
     private String description;
-    private LocalDateTime achievedAt;
+    private Integer milestone;
 }
