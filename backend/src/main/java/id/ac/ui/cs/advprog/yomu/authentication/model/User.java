@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "app_users")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 public class User implements UserDetails {
@@ -36,7 +36,7 @@ public class User implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "`role`", nullable = false, length = 10)
+    @Column(nullable = false, length = 10)
     private Role role;
 
     @Column(length = 10)
