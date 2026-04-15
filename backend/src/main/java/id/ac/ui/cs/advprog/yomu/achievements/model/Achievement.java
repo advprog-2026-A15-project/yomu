@@ -17,4 +17,7 @@ public class Achievement {
     private String name;
 
     private String description;
+
+    @Column(nullable = false)
+    private Integer milestone;
 }

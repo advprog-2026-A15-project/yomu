@@ -6,25 +6,71 @@ import CommentItem from '../components/CommentItem';
 const API_BASE = 'http://localhost:8080';
 
 export default function DetailBacaan() {
-    const {id} = useParams();
-    const navigate = useNavigate();
-    const [bacaan, setBacaan] = useState(null);
-    const [comments, setComments] = useState([]);
-    const [jawaban, setJawaban] = useState('');
-    const [hasilKuis, setHasilKuis] = useState('');
-    const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
-    const [myAchievements, setMyAchievements] = useState([]);
-    const [currentUser, setCurrentUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [bacaan, setBacaan] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [jawaban, setJawaban] = useState('');
+  const [hasilKuis, setHasilKuis] = useState('');
+  const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
+  const [myAchievements, setMyAchievements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const unlockedAchievements = myAchievements.filter((achievement) => achievement?.unlocked);
 
-    // State untuk komentar root baru
-    const [newComment, setNewComment] = useState("");
-    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    const token = getToken();
 
-    const fetchCommentsOnly = async () => {
-        const token = getToken();
-        if (!token) return;
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        };
+
+        const [bacaanRes, commentRes] = await Promise.all([
+          fetch(`${API_BASE}/api/bacaan/${id}`, { headers, signal: controller.signal }),
+          fetch(`${API_BASE}/api/comment`, { headers, signal: controller.signal }),
+        ]);
+
+        if (
+          bacaanRes.status === 401 ||
+          bacaanRes.status === 403 ||
+          commentRes.status === 401 ||
+          commentRes.status === 403
+        ) {
+          navigate('/login');
+          return;
+        }
+
+        if (bacaanRes.status === 404) {
+          setError('Bacaan tidak ditemukan.');
+          return;
+        }
+
+        if (!bacaanRes.ok) {
+          const text = await bacaanRes.text();
+          throw new Error(text || 'Gagal mengambil detail bacaan');
+        }
+
+        if (!commentRes.ok) {
+          const text = await commentRes.text();
+          throw new Error(text || 'Gagal mengambil daftar komentar');
+        }
+
+        const bacaanData = await bacaanRes.json();
+        const commentData = await commentRes.json();
+
+        setBacaan(bacaanData);
+        setComments(Array.isArray(commentData) ? commentData : []);
 
         try {
             const res = await fetch(`${API_BASE}/api/comment`, {
@@ -281,48 +327,48 @@ export default function DetailBacaan() {
                 <p style={{whiteSpace: 'pre-wrap', lineHeight: 1.6}}>{bacaan.isiTeks}</p>
             </section>
 
-            <section className="form-card" style={{maxWidth: 'none'}}>
-                <h3 style={{color: 'var(--lavender)', marginTop: 0}}>Kuis Pemahaman</h3>
-                <p style={{marginTop: 0}}>
-                    {bacaan.quizzes?.[0]?.pertanyaan || 'Belum ada kuis untuk bacaan ini.'}
-                </p>
+             <section className="form-card" style={{ maxWidth: 'none' }}>
+        <h3 style={{ color: 'var(--lavender)', marginTop: 0 }}>Kuis Pemahaman</h3>
+        <p style={{ marginTop: 0 }}>
+          {bacaan.quizzes?.[0]?.pertanyaan || 'Belum ada kuis untuk bacaan ini.'}
+        </p>
 
-                {bacaan.quizzes?.[0] ? (
-                    <form onSubmit={handleSubmitKuis} style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                        <input
-                            type="text"
-                            className="input-entry"
-                            placeholder="Masukkan jawaban Anda"
-                            value={jawaban}
-                            onChange={(e) => setJawaban(e.target.value)}
-                            required
-                            style={{flex: '1 1 300px'}}
-                        />
-                        <button className="btn btn-detail" type="submit" disabled={isSubmittingQuiz}>
-                            {isSubmittingQuiz ? 'Mengirim...' : 'Kirim Jawaban'}
-                        </button>
-                    </form>
-                ) : null}
+        {bacaan.quizzes?.[0] ? (
+          <form onSubmit={handleSubmitKuis} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              className="input-entry"
+              placeholder="Masukkan jawaban Anda"
+              value={jawaban}
+              onChange={(e) => setJawaban(e.target.value)}
+              required
+              style={{ flex: '1 1 300px' }}
+            />
+            <button className="btn btn-detail" type="submit" disabled={isSubmittingQuiz}>
+              {isSubmittingQuiz ? 'Mengirim...' : 'Kirim Jawaban'}
+            </button>
+          </form>
+        ) : null}
 
-                {hasilKuis ? (
-                    <p style={{marginTop: '12px', color: hasilKuis.includes('Benar') ? 'var(--green)' : 'var(--red)'}}>
-                        {hasilKuis}
-                    </p>
-                ) : null}
+        {hasilKuis ? (
+          <p style={{ marginTop: '12px', color: hasilKuis.includes('Benar') ? 'var(--green)' : 'var(--red)' }}>
+            {hasilKuis}
+          </p>
+        ) : null}
 
-                <p style={{marginTop: '16px', marginBottom: '6px', color: 'var(--subtext0)'}}>Achievement saya:</p>
-                {myAchievements.length === 0 ? (
-                    <p style={{margin: 0}}>Belum ada achievement.</p>
-                ) : (
-                    <ul style={{margin: 0, paddingLeft: '18px'}}>
-                        {myAchievements.map((achievement) => (
-                            <li key={achievement.achievementId}>
-                                {achievement.name} - {achievement.description}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
+        <p style={{ marginTop: '16px', marginBottom: '6px', color: 'var(--subtext0)' }}>Achievement saya:</p>
+        {unlockedAchievements.length === 0 ? (
+          <p style={{ margin: 0 }}>Belum ada achievement yang terbuka.</p>
+        ) : (
+          <ul style={{ margin: 0, paddingLeft: '18px' }}>
+            {unlockedAchievements.map((achievement) => (
+              <li key={achievement.achievementId}>
+                {achievement.name} - {achievement.description}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
             <section className="form-card" style={{maxWidth: 'none'}}>
                 <h3 style={{color: 'var(--lavender)', marginTop: 0}}>Forum Diskusi ({relatedComments.length} Komentar
