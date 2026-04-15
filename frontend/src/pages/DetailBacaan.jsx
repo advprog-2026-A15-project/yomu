@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Link, useNavigate, useParams} from 'react-router-dom';
 import {getCurrentUser, getToken} from '../services/authService';
 import CommentItem from '../components/CommentItem';
@@ -6,87 +6,61 @@ import CommentItem from '../components/CommentItem';
 const API_BASE = 'http://localhost:8080';
 
 export default function DetailBacaan() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [bacaan, setBacaan] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [jawaban, setJawaban] = useState('');
-  const [hasilKuis, setHasilKuis] = useState('');
-  const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
-  const [myAchievements, setMyAchievements] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const unlockedAchievements = myAchievements.filter((achievement) => achievement?.unlocked);
+    const {id} = useParams();
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const token = getToken();
+    const [bacaan, setBacaan] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [newComment, setNewComment] = useState('');
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+    const [jawaban, setJawaban] = useState('');
+    const [hasilKuis, setHasilKuis] = useState('');
+    const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
+    const [myAchievements, setMyAchievements] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    const unlockedAchievements = myAchievements.filter((achievement) => achievement?.unlocked);
 
-    const load = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        };
-
-        const [bacaanRes, commentRes] = await Promise.all([
-          fetch(`${API_BASE}/api/bacaan/${id}`, { headers, signal: controller.signal }),
-          fetch(`${API_BASE}/api/comment`, { headers, signal: controller.signal }),
-        ]);
-
-        if (
-          bacaanRes.status === 401 ||
-          bacaanRes.status === 403 ||
-          commentRes.status === 401 ||
-          commentRes.status === 403
-        ) {
-          navigate('/login');
-          return;
+    const fetchCommentsOnly = useCallback(async () => {
+        const token = getToken();
+        if (!token) {
+            navigate('/login');
+            return;
         }
 
-        if (bacaanRes.status === 404) {
-          setError('Bacaan tidak ditemukan.');
-          return;
+        const res = await fetch(`${API_BASE}/api/comment`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (res.status === 401 || res.status === 403) {
+            navigate('/login');
+            return;
         }
 
-        if (!bacaanRes.ok) {
-          const text = await bacaanRes.text();
-          throw new Error(text || 'Gagal mengambil detail bacaan');
+        if (res.ok) {
+            const data = await res.json();
+            setComments(Array.isArray(data) ? data : []);
         }
+    }, [navigate]);
 
-        if (!commentRes.ok) {
-          const text = await commentRes.text();
-          throw new Error(text || 'Gagal mengambil daftar komentar');
-        }
+    useEffect(() => {
+        let isMounted = true;
 
-        const bacaanData = await bacaanRes.json();
-        const commentData = await commentRes.json();
-
-        setBacaan(bacaanData);
-        setComments(Array.isArray(commentData) ? commentData : []);
-
-        try {
-            const res = await fetch(`${API_BASE}/api/comment`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setComments(Array.isArray(data) ? data : []);
+        getCurrentUser().then((user) => {
+            if (isMounted) {
+                setCurrentUser(user);
             }
-        } catch (err) {
-            console.error("Gagal refresh komentar", err);
-        }
-    };
+        });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -100,6 +74,7 @@ export default function DetailBacaan() {
         const load = async () => {
             setLoading(true);
             setError('');
+
             try {
                 const headers = {
                     'Content-Type': 'application/json',
@@ -140,21 +115,21 @@ export default function DetailBacaan() {
 
                 const bacaanData = await bacaanRes.json();
                 const commentData = await commentRes.json();
-
                 setBacaan(bacaanData);
                 setComments(Array.isArray(commentData) ? commentData : []);
 
                 try {
                     const achievementRes = await fetch(`${API_BASE}/api/achievements/me`, {
                         headers,
-                        signal: controller.signal
+                        signal: controller.signal,
                     });
+
                     if (achievementRes.ok) {
                         const achievementData = await achievementRes.json();
                         setMyAchievements(Array.isArray(achievementData) ? achievementData : []);
                     }
                 } catch {
-                    // Achievement tidak kritikal untuk menampilkan halaman detail bacaan.
+                    // Achievement tidak kritikal untuk render halaman.
                 }
             } catch (err) {
                 if (err.name !== 'AbortError') {
@@ -168,20 +143,6 @@ export default function DetailBacaan() {
         load();
         return () => controller.abort();
     }, [id, navigate]);
-
-    useEffect(() => {
-        let isMounted = true;
-
-        getCurrentUser().then((user) => {
-            if (isMounted) {
-                setCurrentUser(user);
-            }
-        });
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
 
     const handleSubmitKuis = async (e) => {
         e.preventDefault();
@@ -238,29 +199,31 @@ export default function DetailBacaan() {
 
     const relatedComments = useMemo(() => {
         return comments.filter((comment) => {
-            const isForThisBacaan = comment?.bacaan?.id === id || comment?.bacaanId === id;
-            // Anggap backend menambahkan field parentId. Root comment adalah comment yang parentId-nya null/undefined
-            const isRootComment = !comment.parentId;
+            const bacaanId = comment?.bacaan?.id ?? comment?.bacaanId;
+            const isForThisBacaan = String(bacaanId) === String(id);
+            const isRootComment = !comment?.parentId && !comment?.parentCommentId;
             return isForThisBacaan && isRootComment;
         });
     }, [comments, id]);
 
-
-    // Handle Submit Komentar Utama (Root)
     const handleMainCommentSubmit = async (e) => {
         e.preventDefault();
+
         const token = getToken();
         if (!token) {
             navigate('/login');
             return;
         }
 
+        if (!newComment.trim()) {
+            return;
+        }
+
         setIsSubmittingComment(true);
         try {
             const payload = {
-                isiKomentar: newComment,
-                bacaanId: id
-                // parentCommentId dibiarkan kosong karena ini adalah root comment
+                isiKomentar: newComment.trim(),
+                bacaanId: id,
             };
 
             const res = await fetch(`${API_BASE}/api/comment`, {
@@ -272,15 +235,20 @@ export default function DetailBacaan() {
                 body: JSON.stringify(payload),
             });
 
-            if (res.ok) {
-                setNewComment("");
-                fetchCommentsOnly(); // Refresh daftar komentar
-            } else {
-                alert("Gagal mengirim komentar");
+            if (res.status === 401 || res.status === 403) {
+                navigate('/login');
                 return;
             }
+
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Gagal mengirim komentar');
+            }
+
+            setNewComment('');
+            await fetchCommentsOnly();
         } catch (err) {
-            alert(err.message);
+            setError(err.message || 'Terjadi kesalahan saat mengirim komentar.');
         } finally {
             setIsSubmittingComment(false);
         }
@@ -297,7 +265,9 @@ export default function DetailBacaan() {
     if (error) {
         return (
             <div className="page-container">
-                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>← Kembali</Link>
+                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>
+                    ← Kembali
+                </Link>
                 <p style={{color: 'var(--red)'}}>{error}</p>
             </div>
         );
@@ -306,77 +276,91 @@ export default function DetailBacaan() {
     if (!bacaan) {
         return (
             <div className="page-container">
-                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>← Kembali</Link>
+                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>
+                    ← Kembali
+                </Link>
                 <p>Bacaan tidak ditemukan.</p>
             </div>
         );
     }
 
     return (
-        <div className="page-container" style={{gap: '24px'}}>
+        <div className="page-container" style={{display: 'flex', flexDirection: 'column', gap: '28px'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>← Kembali</Link>
-                <Link to={`/bacaan/${id}/comment/new`}>
-                    <button className="btn btn-add" type="button">+ Tambah Komentar</button>
+                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>
+                    ← Kembali
                 </Link>
             </div>
 
             <section className="form-card" style={{maxWidth: 'none'}}>
                 <h2 style={{color: 'var(--lavender)', marginTop: 0}}>{bacaan.judul}</h2>
-                <p style={{color: 'var(--subtext0)', marginBottom: '16px', wordBreak: 'break-all'}}>ID: {bacaan.id}</p>
+                <p
+                    style={{
+                        color: 'var(--subtext0)',
+                        marginBottom: '16px',
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    ID: {bacaan.id}
+                </p>
                 <p style={{whiteSpace: 'pre-wrap', lineHeight: 1.6}}>{bacaan.isiTeks}</p>
             </section>
 
-             <section className="form-card" style={{ maxWidth: 'none' }}>
-        <h3 style={{ color: 'var(--lavender)', marginTop: 0 }}>Kuis Pemahaman</h3>
-        <p style={{ marginTop: 0 }}>
-          {bacaan.quizzes?.[0]?.pertanyaan || 'Belum ada kuis untuk bacaan ini.'}
-        </p>
+            <section className="form-card" style={{maxWidth: 'none'}}>
+                <h3 style={{color: 'var(--lavender)', marginTop: 0}}>Kuis Pemahaman</h3>
+                <p style={{marginTop: 0}}>{bacaan.quizzes?.[0]?.pertanyaan || 'Belum ada kuis untuk bacaan ini.'}</p>
 
-        {bacaan.quizzes?.[0] ? (
-          <form onSubmit={handleSubmitKuis} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <input
-              type="text"
-              className="input-entry"
-              placeholder="Masukkan jawaban Anda"
-              value={jawaban}
-              onChange={(e) => setJawaban(e.target.value)}
-              required
-              style={{ flex: '1 1 300px' }}
-            />
-            <button className="btn btn-detail" type="submit" disabled={isSubmittingQuiz}>
-              {isSubmittingQuiz ? 'Mengirim...' : 'Kirim Jawaban'}
-            </button>
-          </form>
-        ) : null}
+                {bacaan.quizzes?.[0] ? (
+                    <form onSubmit={handleSubmitKuis} style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                        <input
+                            type="text"
+                            className="input-entry"
+                            placeholder="Masukkan jawaban Anda"
+                            value={jawaban}
+                            onChange={(e) => setJawaban(e.target.value)}
+                            required
+                            style={{flex: '1 1 300px'}}
+                        />
+                        <button className="btn btn-detail" type="submit" disabled={isSubmittingQuiz}>
+                            {isSubmittingQuiz ? 'Mengirim...' : 'Kirim Jawaban'}
+                        </button>
+                    </form>
+                ) : null}
 
-        {hasilKuis ? (
-          <p style={{ marginTop: '12px', color: hasilKuis.includes('Benar') ? 'var(--green)' : 'var(--red)' }}>
-            {hasilKuis}
-          </p>
-        ) : null}
+                {hasilKuis ? (
+                    <p
+                        style={{
+                            marginTop: '12px',
+                            color: hasilKuis.includes('Benar') ? 'var(--green)' : 'var(--red)',
+                        }}
+                    >
+                        {hasilKuis}
+                    </p>
+                ) : null}
 
-        <p style={{ marginTop: '16px', marginBottom: '6px', color: 'var(--subtext0)' }}>Achievement saya:</p>
-        {unlockedAchievements.length === 0 ? (
-          <p style={{ margin: 0 }}>Belum ada achievement yang terbuka.</p>
-        ) : (
-          <ul style={{ margin: 0, paddingLeft: '18px' }}>
-            {unlockedAchievements.map((achievement) => (
-              <li key={achievement.achievementId}>
-                {achievement.name} - {achievement.description}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+                <p style={{marginTop: '16px', marginBottom: '6px', color: 'var(--subtext0)'}}>Achievement saya:</p>
+                {unlockedAchievements.length === 0 ? (
+                    <p style={{margin: 0}}>Belum ada achievement yang terbuka.</p>
+                ) : (
+                    <ul style={{margin: 0, paddingLeft: '18px'}}>
+                        {unlockedAchievements.map((achievement) => (
+                            <li key={achievement.achievementId}>
+                                {achievement.name} - {achievement.description}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
 
             <section className="form-card" style={{maxWidth: 'none'}}>
-                <h3 style={{color: 'var(--lavender)', marginTop: 0}}>Forum Diskusi ({relatedComments.length} Komentar
-                    Utama)</h3>
+                <h3 style={{color: 'var(--lavender)', marginTop: 0}}>
+                    Forum Diskusi ({relatedComments.length} Komentar Utama)
+                </h3>
 
-                {/* Form Tambah Komentar Utama - Diubah menjadi in-line agar lebih modern */}
-                <form onSubmit={handleMainCommentSubmit}
-                      style={{marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                <form
+                    onSubmit={handleMainCommentSubmit}
+                    style={{marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px'}}
+                >
                     <textarea
                         className="input-entry"
                         value={newComment}
@@ -398,7 +382,6 @@ export default function DetailBacaan() {
 
                 <hr style={{borderColor: 'var(--surface1)', margin: '20px 0'}}/>
 
-                {/* Daftar Komentar Rekursif */}
                 {relatedComments.length === 0 ? (
                     <p style={{color: 'var(--subtext0)'}}>Belum ada komentar untuk bacaan ini. Jadilah yang pertama!</p>
                 ) : (
@@ -409,7 +392,7 @@ export default function DetailBacaan() {
                                 comment={comment}
                                 bacaanId={id}
                                 onCommentRefresh={fetchCommentsOnly}
-                                    currentUser={currentUser}
+                                currentUser={currentUser}
                             />
                         ))}
                     </div>
