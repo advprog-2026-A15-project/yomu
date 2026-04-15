@@ -51,6 +51,7 @@ public class Comment {
     @Column(name = "parent_id", insertable = false, updatable = false)
     private UUID parentId;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> replies = new ArrayList<>();
 }

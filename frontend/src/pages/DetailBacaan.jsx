@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {Link, useNavigate, useParams} from 'react-router-dom';
-import {getToken} from '../services/authService';
+import {getCurrentUser, getToken} from '../services/authService';
 import CommentItem from '../components/CommentItem';
 
 const API_BASE = 'http://localhost:8080';
@@ -14,6 +14,7 @@ export default function DetailBacaan() {
     const [hasilKuis, setHasilKuis] = useState('');
     const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
     const [myAchievements, setMyAchievements] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -81,12 +82,14 @@ export default function DetailBacaan() {
 
                 if (!bacaanRes.ok) {
                     const text = await bacaanRes.text();
-                    throw new Error(text || 'Gagal mengambil detail bacaan');
+                    setError(text || 'Gagal mengambil detail bacaan');
+                    return;
                 }
 
                 if (!commentRes.ok) {
                     const text = await commentRes.text();
-                    throw new Error(text || 'Gagal mengambil daftar komentar');
+                    setError(text || 'Gagal mengambil daftar komentar');
+                    return;
                 }
 
                 const bacaanData = await bacaanRes.json();
@@ -120,6 +123,20 @@ export default function DetailBacaan() {
         return () => controller.abort();
     }, [id, navigate]);
 
+    useEffect(() => {
+        let isMounted = true;
+
+        getCurrentUser().then((user) => {
+            if (isMounted) {
+                setCurrentUser(user);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
     const handleSubmitKuis = async (e) => {
         e.preventDefault();
 
@@ -148,7 +165,8 @@ export default function DetailBacaan() {
 
             const text = await res.text();
             if (!res.ok) {
-                throw new Error(text || 'Gagal submit kuis');
+                setHasilKuis(text || 'Gagal submit kuis');
+                return;
             }
 
             setHasilKuis(text);
@@ -212,7 +230,8 @@ export default function DetailBacaan() {
                 setNewComment("");
                 fetchCommentsOnly(); // Refresh daftar komentar
             } else {
-                throw new Error("Gagal mengirim komentar");
+                alert("Gagal mengirim komentar");
+                return;
             }
         } catch (err) {
             alert(err.message);
@@ -344,6 +363,7 @@ export default function DetailBacaan() {
                                 comment={comment}
                                 bacaanId={id}
                                 onCommentRefresh={fetchCommentsOnly}
+                                    currentUser={currentUser}
                             />
                         ))}
                     </div>

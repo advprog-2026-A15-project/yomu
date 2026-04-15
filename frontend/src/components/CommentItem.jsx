@@ -4,10 +4,16 @@ import {getToken} from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
-const CommentItem = ({comment, bacaanId, onCommentRefresh}) => {
+const CommentItem = ({comment, bacaanId, onCommentRefresh, currentUser}) => {
     const [showReplyForm, setShowReplyForm] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const canManageComment = Boolean(
+        currentUser && (
+            currentUser.role === 'ADMIN' ||
+            (currentUser.username && comment.username && currentUser.username === comment.username)
+        )
+    );
 
     const handleReplySubmit = async (e) => {
         e.preventDefault();
@@ -36,7 +42,8 @@ const CommentItem = ({comment, bacaanId, onCommentRefresh}) => {
                 setReplyText('');
                 if (onCommentRefresh) onCommentRefresh();
             } else {
-                throw new Error("Gagal mengirim balasan");
+                console.error("Gagal mengirim balasan");
+                alert("Gagal mengirim balasan");
             }
         } catch (error) {
             console.error("Error:", error);
@@ -83,13 +90,17 @@ const CommentItem = ({comment, bacaanId, onCommentRefresh}) => {
                     <div style={{flex: 1}}></div>
                     {/* Spacer */}
 
-                    <Link to={`/bacaan/${bacaanId}/comment/${comment.id}/edit`}>
-                        <button className="btn btn-edit" style={{padding: '4px 12px', fontSize: '12px'}}>Edit</button>
-                    </Link>
-                    <Link to={`/bacaan/${bacaanId}/comment/${comment.id}/delete`}>
-                        <button className="btn btn-delete" style={{padding: '4px 12px', fontSize: '12px'}}>Hapus
-                        </button>
-                    </Link>
+                    {canManageComment ? (
+                        <>
+                            <Link to={`/bacaan/${bacaanId}/comment/${comment.id}/edit`} state={{comment, bacaanId}}>
+                                <button className="btn btn-edit" style={{padding: '4px 12px', fontSize: '12px'}}>Edit</button>
+                            </Link>
+                            <Link to={`/bacaan/${bacaanId}/comment/${comment.id}/delete`} state={{comment, bacaanId}}>
+                                <button className="btn btn-delete" style={{padding: '4px 12px', fontSize: '12px'}}>Hapus
+                                </button>
+                            </Link>
+                        </>
+                    ) : null}
                 </div>
             </article>
 
@@ -137,6 +148,7 @@ const CommentItem = ({comment, bacaanId, onCommentRefresh}) => {
                             comment={reply}
                             bacaanId={bacaanId}
                             onCommentRefresh={onCommentRefresh}
+                            currentUser={currentUser}
                         />
                     ))}
                 </div>

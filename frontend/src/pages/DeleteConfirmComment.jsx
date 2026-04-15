@@ -28,9 +28,13 @@ export default function DeleteConfirmComment() {
             }
         })
             .then((res) => {
-                if (res.status === 401 || res.status === 403) {
+                if (res.status === 401) {
                     navigate('/login');
                     return;
+                }
+
+                if (res.status === 403) {
+                    throw new Error('Anda tidak memiliki izin untuk menghapus komentar ini');
                 }
 
                 if (!res.ok) {

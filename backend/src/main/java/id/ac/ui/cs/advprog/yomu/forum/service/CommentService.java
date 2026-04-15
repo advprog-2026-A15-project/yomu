@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.yomu.forum.service;
 
 import id.ac.ui.cs.advprog.yomu.forum.dto.CommentResponse;
 import id.ac.ui.cs.advprog.yomu.forum.dto.CreateCommentRequest;
+import id.ac.ui.cs.advprog.yomu.forum.dto.UpdateCommentRequest;
 import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface CommentService {
 
     Comment create(CreateCommentRequest request);
 
-    Comment update(UUID id, Comment comment); // Untuk menyimpan perubahan
+    Comment update(UUID id, UpdateCommentRequest request); // Untuk menyimpan perubahan
 
     void delete(UUID id);
 }

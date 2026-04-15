@@ -2,8 +2,10 @@ package id.ac.ui.cs.advprog.yomu.forum.controller;
 
 import id.ac.ui.cs.advprog.yomu.forum.dto.CommentResponse;
 import id.ac.ui.cs.advprog.yomu.forum.dto.CreateCommentRequest;
+import id.ac.ui.cs.advprog.yomu.forum.dto.UpdateCommentRequest;
 import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 import id.ac.ui.cs.advprog.yomu.forum.service.CommentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +26,7 @@ public class CommentController {
     }
 
     @PostMapping
-    public Comment create(@RequestBody CreateCommentRequest request) {
+    public Comment create(@Valid @RequestBody CreateCommentRequest request) {
         return commentService.create(request);
     }
 
@@ -39,7 +41,7 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public Comment update(@PathVariable UUID id, @RequestBody Comment comment) {
-        return commentService.update(id, comment);
+    public Comment update(@PathVariable UUID id, @Valid @RequestBody UpdateCommentRequest request) {
+        return commentService.update(id, request);
     }
 }
