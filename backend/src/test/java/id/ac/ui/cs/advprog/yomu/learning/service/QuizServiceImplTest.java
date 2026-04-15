@@ -1,10 +1,10 @@
 package id.ac.ui.cs.advprog.yomu.learning.service;
 
+import id.ac.ui.cs.advprog.yomu.achievements.service.AchievementService;
+import id.ac.ui.cs.advprog.yomu.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomu.learning.models.Bacaan;
 import id.ac.ui.cs.advprog.yomu.learning.models.Quiz;
 import id.ac.ui.cs.advprog.yomu.learning.repository.QuizRepository;
-import id.ac.ui.cs.advprog.yomu.achievements.service.AchievementService;
-import id.ac.ui.cs.advprog.yomu.authentication.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,24 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 html,
 body,
 #root {
-  min-height: 100%;
+    min-height: 100%;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background: var(--base, #24273a);
-  color: var(--text, #cad3f5);
-  line-height: 1.4;
+    font-family: 'Inter', sans-serif;
+    background: var(--base, #24273a);
+    color: var(--text, #cad3f5);
+    line-height: 1.4;
 }
 
 a {
-  color: inherit;
+    color: inherit;
 }

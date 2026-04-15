@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getToken, logout } from '../services/authService';
+import {useEffect, useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {getToken, logout} from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -150,14 +150,14 @@ export default function Achievements() {
     setAdminDailyMissions([]);
   };
 
-  useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    useEffect(() => {
+        const token = getToken();
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
-    const controller = new AbortController();
+        const controller = new AbortController();
 
     const run = async () => {
       setLoading(true);

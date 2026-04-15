@@ -6,11 +6,13 @@ import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 public class Bacaan {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

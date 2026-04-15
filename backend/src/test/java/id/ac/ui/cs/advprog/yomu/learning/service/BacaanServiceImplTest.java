@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +42,7 @@ class BacaanServiceImplTest {
 
     @Test
     void testFindAll() {
-        when(repository.findAll()).thenReturn(Arrays.asList(bacaan));
+        when(repository.findAll()).thenReturn(Collections.singletonList(bacaan));
 
         List<Bacaan> result = service.findAll();
 
