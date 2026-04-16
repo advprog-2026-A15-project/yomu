@@ -1,17 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getToken, logout } from '../services/authService';
+import { getCurrentUser, getRole, getToken, logout } from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
 export default function Clans() {
+  const LEAGUES = ['BRONZE', 'SILVER', 'GOLD'];
   const navigate = useNavigate();
   const [clans, setClans] = useState([]);
+  const [selectedLeague, setSelectedLeague] = useState('BRONZE');
+  const [leaderboardEntries, setLeaderboardEntries] = useState([]);
+  const [myLeaderboardEntry, setMyLeaderboardEntry] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(getRole() === 'ADMIN');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [endingSeason, setEndingSeason] = useState(false);
+  const [adminMessage, setAdminMessage] = useState('');
   const [error, setError] = useState('');
+  const [leaderboardError, setLeaderboardError] = useState('');
+  const [adminError, setAdminError] = useState('');
 
   const joinedClans = useMemo(
     () => clans.filter((clan) => clan.joined),
@@ -59,11 +69,93 @@ export default function Clans() {
     }
   };
 
+  const loadLeaderboard = async (signal, league = selectedLeague) => {
+    const token = getToken();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    setLeaderboardLoading(true);
+    setLeaderboardError('');
+    try {
+      const leaderboardRes = await fetch(`${API_BASE}/api/clans/leaderboard?league=${league}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        signal,
+      });
+
+      if (leaderboardRes.status === 401 || leaderboardRes.status === 403) {
+        logout();
+        navigate('/login');
+        return;
+      }
+
+      if (!leaderboardRes.ok) {
+        const text = await leaderboardRes.text();
+        throw new Error(text || 'Gagal memuat leaderboard');
+      }
+
+      const leaderboardData = await leaderboardRes.json();
+      setLeaderboardEntries(Array.isArray(leaderboardData) ? leaderboardData : []);
+
+      const myRes = await fetch(`${API_BASE}/api/clans/leaderboard/me`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        signal,
+      });
+
+      if (myRes.status === 401 || myRes.status === 403) {
+        logout();
+        navigate('/login');
+        return;
+      }
+
+      if (myRes.status === 404) {
+        setMyLeaderboardEntry(null);
+      } else if (!myRes.ok) {
+        const text = await myRes.text();
+        throw new Error(text || 'Gagal memuat ranking clan saya');
+      } else {
+        const myData = await myRes.json();
+        setMyLeaderboardEntry(myData || null);
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        setLeaderboardError(err.message || 'Terjadi kesalahan saat memuat leaderboard');
+      }
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  };
+
+  const loadCurrentUserRole = async (signal) => {
+    const token = getToken();
+    if (!token) {
+      return;
+    }
+
+    try {
+      const user = await getCurrentUser();
+      if (signal?.aborted) return;
+      setIsAdmin(user?.role === 'ADMIN' || getRole() === 'ADMIN');
+    } catch {
+      if (signal?.aborted) return;
+      setIsAdmin(getRole() === 'ADMIN');
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     loadClans(controller.signal);
+    loadLeaderboard(controller.signal, selectedLeague);
+    loadCurrentUserRole(controller.signal);
     return () => controller.abort();
-  }, [navigate]);
+  }, [navigate, selectedLeague]);
 
   const handleCreateClan = async (e) => {
     e.preventDefault();
@@ -131,6 +223,48 @@ export default function Clans() {
     }
   };
 
+  const handleEndSeason = async () => {
+    const token = getToken();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    setEndingSeason(true);
+    setAdminError('');
+    setAdminMessage('');
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/clans/end-season`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        if (res.status === 401) {
+          logout();
+          navigate('/login');
+          return;
+        }
+        throw new Error('Akses ditolak. Hanya admin yang bisa mengakhiri season.');
+      }
+
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(text || 'Gagal mengakhiri season');
+      }
+
+      setAdminMessage('Season berhasil diproses. Leaderboard telah diperbarui.');
+      await Promise.all([loadClans(), loadLeaderboard(undefined, selectedLeague)]);
+    } catch (err) {
+      setAdminError(err.message || 'Terjadi kesalahan saat memproses end season');
+    } finally {
+      setEndingSeason(false);
+    }
+  };
+
   return (
     <div className="page-container" style={{ gap: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -166,6 +300,68 @@ export default function Clans() {
 
       {error && <div className="status-error">{error}</div>}
       {loading && <div className="status-note">Memuat clan...</div>}
+
+      <section className="form-card" style={{ maxWidth: 'none' }}>
+        <h2 style={{ marginTop: 0, color: 'var(--lavender)' }}>Leaderboard Liga</h2>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          {LEAGUES.map((league) => (
+            <button
+              key={league}
+              className={`btn ${selectedLeague === league ? 'btn-detail' : 'btn-ghost'}`}
+              type="button"
+              onClick={() => setSelectedLeague(league)}
+              disabled={leaderboardLoading}
+            >
+              {league}
+            </button>
+          ))}
+        </div>
+
+        {leaderboardError && <div className="status-error">{leaderboardError}</div>}
+        {leaderboardLoading && <div className="status-note">Memuat leaderboard...</div>}
+
+        {!leaderboardLoading && (
+          <>
+            {myLeaderboardEntry ? (
+              <div className="status-note" style={{ marginBottom: '12px' }}>
+                Clan saya: <strong>{myLeaderboardEntry.clanName}</strong> | Liga:{' '}
+                <strong>{myLeaderboardEntry.league}</strong> | Rank: <strong>#{myLeaderboardEntry.rank}</strong> |
+                Poin: <strong>{myLeaderboardEntry.currentSeasonPoints}</strong>
+              </div>
+            ) : (
+              <div className="status-note" style={{ marginBottom: '12px' }}>
+                Anda belum memiliki peringkat clan.
+              </div>
+            )}
+
+            {leaderboardEntries.length === 0 ? (
+              <div className="status-note">Belum ada data leaderboard di liga ini.</div>
+            ) : (
+              <ol style={{ margin: 0, paddingLeft: '20px' }}>
+                {leaderboardEntries.map((entry) => (
+                  <li key={entry.clanId} style={{ marginBottom: '8px' }}>
+                    <strong>{entry.clanName}</strong> - Rank #{entry.rank} - {entry.currentSeasonPoints} poin
+                  </li>
+                ))}
+              </ol>
+            )}
+          </>
+        )}
+      </section>
+
+      {isAdmin && (
+        <section className="form-card" style={{ maxWidth: 'none' }}>
+          <h2 style={{ marginTop: 0, color: 'var(--lavender)' }}>Admin: End Season</h2>
+          <p style={{ marginTop: 0 }}>
+            Tombol ini akan memicu kalkulasi promosi/degradasi berdasarkan skor clan saat ini.
+          </p>
+          {adminError && <div className="status-error">{adminError}</div>}
+          {adminMessage && <div className="status-note">{adminMessage}</div>}
+          <button className="btn btn-delete" type="button" onClick={handleEndSeason} disabled={endingSeason}>
+            {endingSeason ? 'Memproses end season...' : 'End Season Sekarang'}
+          </button>
+        </section>
+      )}
 
       {!loading && (
         <>

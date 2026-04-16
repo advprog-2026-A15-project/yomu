@@ -1,6 +1,10 @@
 ALTER TABLE clan_group
-    ADD COLUMN IF NOT EXISTS current_league VARCHAR(20) NOT NULL DEFAULT 'BRONZE',
-    ADD COLUMN IF NOT EXISTS current_season_points BIGINT NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS current_league VARCHAR(20) NOT NULL DEFAULT 'BRONZE';
+
+ALTER TABLE clan_group
+    ADD COLUMN IF NOT EXISTS current_season_points BIGINT NOT NULL DEFAULT 0;
+
+ALTER TABLE clan_group
     ADD COLUMN IF NOT EXISTS last_season_rank INT;
 
 CREATE TABLE IF NOT EXISTS league_season_state (
