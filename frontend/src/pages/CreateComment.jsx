@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getToken } from '../services/authService';
+import {useEffect, useState} from 'react';
+import {Link, useNavigate, useParams} from 'react-router-dom';
+import {getToken} from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
 export default function CreateComment() {
-    const { bacaanId } = useParams();
+    const {bacaanId} = useParams();
     const navigate = useNavigate();
     const [judul, setJudul] = useState('');
     const [isiKomentar, setIsiKomentar] = useState('');
@@ -84,17 +84,18 @@ export default function CreateComment() {
     };
 
     return (
-        <div className="page-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <div className="page-container" style={{alignItems: 'center', justifyContent: 'center'}}>
             <div className="form-card">
-                <Link to={`/bacaan/${bacaanId}`} style={{ color: 'var(--blue)', textDecoration: 'none' }}>← Kembali ke detail</Link>
-                <h2 style={{ color: 'var(--lavender)', margin: '20px 0 8px 0' }}>Tambah Komentar</h2>
-                <p style={{ color: 'var(--subtext)', marginTop: 0 }}>
+                <Link to={`/bacaan/${bacaanId}`} style={{color: 'var(--blue)', textDecoration: 'none'}}>← Kembali ke
+                    detail</Link>
+                <h2 style={{color: 'var(--lavender)', margin: '20px 0 8px 0'}}>Tambah Komentar</h2>
+                <p style={{color: 'var(--subtext)', marginTop: 0}}>
                     Untuk bacaan: <strong>{judul || bacaanId}</strong>
                 </p>
 
-                {error ? <p style={{ color: 'var(--red)' }}>{error}</p> : null}
+                {error ? <p style={{color: 'var(--red)'}}>{error}</p> : null}
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <form onSubmit={handleSubmit} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
                     <textarea
                         className="input-entry"
                         rows="6"
@@ -106,7 +107,7 @@ export default function CreateComment() {
                     <button
                         type="submit"
                         className="btn"
-                        style={{ backgroundColor: 'var(--green)', color: 'var(--base)' }}
+                        style={{backgroundColor: 'var(--green)', color: 'var(--base)'}}
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Menyimpan...' : 'Simpan Komentar'}

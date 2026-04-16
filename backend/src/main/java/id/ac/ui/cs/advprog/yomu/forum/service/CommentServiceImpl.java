@@ -4,22 +4,28 @@ import id.ac.ui.cs.advprog.yomu.authentication.model.User;
 import id.ac.ui.cs.advprog.yomu.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomu.forum.dto.CommentResponse;
 import id.ac.ui.cs.advprog.yomu.forum.dto.CreateCommentRequest;
+import id.ac.ui.cs.advprog.yomu.forum.dto.UpdateCommentRequest;
 import id.ac.ui.cs.advprog.yomu.forum.models.Comment;
 import id.ac.ui.cs.advprog.yomu.forum.repository.CommentRepository;
 import id.ac.ui.cs.advprog.yomu.learning.models.Bacaan;
 import id.ac.ui.cs.advprog.yomu.learning.repository.BacaanRepository;
 import lombok.RequiredArgsConstructor;
+import id.ac.ui.cs.advprog.yomu.authentication.model.Role;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository repository;
@@ -41,9 +47,17 @@ public class CommentServiceImpl implements CommentService {
         User user = getAuthenticatedUser();
 
         Comment comment = new Comment();
-        comment.setIsiKomentar(request.getIsiKomentar());
+        comment.setIsiKomentar(normalizeCommentText(request.getIsiKomentar()));
         comment.setBacaan(bacaan);
         comment.setUser(user);
+
+        // Cek apakah ini merupakan balasan dari komentar lain
+        if (request.getParentCommentId() != null) {
+            Comment parent = repository.findById(request.getParentCommentId())
+                    .orElseThrow(() -> new RuntimeException("Komentar induk tidak ditemukan"));
+            comment.setParentComment(parent);
+        }
+
         return repository.save(comment);
     }
 
@@ -54,15 +68,39 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void delete(UUID id) {
-        repository.deleteById(id);
+        Comment comment = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Komentar tidak ditemukan"));
+        assertCanModifyComment(comment);
+        repository.delete(comment);
     }
 
     @Override
-    public Comment update(UUID id, Comment dataBaru) {
+    public Comment update(UUID id, UpdateCommentRequest request) {
         return repository.findById(id).map(comment -> {
-            comment.setIsiKomentar(dataBaru.getIsiKomentar());
+            assertCanModifyComment(comment);
+            comment.setIsiKomentar(normalizeCommentText(request.getIsiKomentar()));
             return repository.save(comment);
         }).orElseThrow(() -> new RuntimeException("Gagal update: ID tidak ditemukan"));
+    }
+
+    private String normalizeCommentText(String text) {
+        String normalized = Objects.requireNonNullElse(text, "").trim();
+        if (normalized.isEmpty()) {
+            throw new RuntimeException("Isi komentar tidak boleh kosong");
+        }
+        return normalized;
+    }
+
+    private void assertCanModifyComment(Comment comment) {
+        User currentUser = getAuthenticatedUser();
+        if (currentUser.getRole() == Role.ADMIN) {
+            return;
+        }
+
+        Long commentAuthorId = comment.getUser() != null ? comment.getUser().getId() : comment.getUserId();
+        if (commentAuthorId == null || !commentAuthorId.equals(currentUser.getId())) {
+            throw new AccessDeniedException("Hanya admin atau penulis komentar yang dapat mengubah komentar");
+        }
     }
 
     private User getAuthenticatedUser() {
@@ -91,6 +129,16 @@ public class CommentServiceImpl implements CommentService {
         response.setBacaanId(comment.getBacaanId());
         response.setUsername(comment.getUser() != null ? comment.getUser().getUsername() : "Unknown");
         response.setCreatedAt(comment.getCreatedAt());
+        response.setParentId(comment.getParentId());
+
+        // Mapping balasan (replies) secara rekursif
+        if (comment.getReplies() != null && !comment.getReplies().isEmpty()) {
+            List<CommentResponse> replyResponses = comment.getReplies().stream()
+                    .map(this::mapToCommentResponse) // Pemanggilan rekursif
+                    .toList();
+            response.setReplies(replyResponses);
+        }
+
         return response;
     }
 }
