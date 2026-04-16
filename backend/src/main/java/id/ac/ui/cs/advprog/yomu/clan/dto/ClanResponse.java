@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.yomu.clan.dto;
 
+import id.ac.ui.cs.advprog.yomu.clan.model.LeagueTier;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,5 +15,8 @@ public class ClanResponse {
     private String ownerUsername;
     private long memberCount;
     private boolean joined;
+    private LeagueTier currentLeague;
+    private long currentSeasonPoints;
+    private Integer lastSeasonRank;
     private LocalDateTime createdAt;
 }
