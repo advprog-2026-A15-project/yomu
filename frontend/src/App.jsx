@@ -15,9 +15,9 @@ import DetailBacaan from './pages/DetailBacaan';
 import CreateComment from './pages/CreateComment';
 import EditComment from './pages/EditComment';
 import DeleteConfirmComment from './pages/DeleteConfirmComment';
+import DetailBacaanKuis from './pages/DetailBacaanKuis';
 import Achievements from './pages/Achievements';
 import Clans from './pages/Clans';
-
 import './App.css';
 
 // Komponen untuk melindungi route yang memerlukan autentikasi
@@ -53,6 +53,7 @@ function App() {
                 <Route path="/create" element={<ProtectedRoute><CreateBacaan/></ProtectedRoute>}/>
                 <Route path="/edit/:id" element={<ProtectedRoute><EditBacaan/></ProtectedRoute>}/>
                 <Route path="/delete/:id" element={<ProtectedRoute><DeleteConfirmBacaan/></ProtectedRoute>}/>
+                <Route path="/baca/:id" element={<ProtectedRoute><DetailBacaanKuis/></ProtectedRoute>}/>
                 <Route path="/bacaan/:id" element={<ProtectedRoute><DetailBacaan/></ProtectedRoute>}/>
                 <Route path="/bacaan/:bacaanId/comment/new"
                        element={<ProtectedRoute><CreateComment/></ProtectedRoute>}/>

@@ -27,6 +27,16 @@ public class Clan {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "current_league", nullable = false, length = 20)
+    private LeagueTier currentLeague;
+
+    @Column(name = "current_season_points", nullable = false)
+    private long currentSeasonPoints;
+
+    @Column(name = "last_season_rank")
+    private Integer lastSeasonRank;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -34,6 +44,9 @@ public class Clan {
     void onCreate() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
+        }
+        if (currentLeague == null) {
+            currentLeague = LeagueTier.BRONZE;
         }
     }
 }
