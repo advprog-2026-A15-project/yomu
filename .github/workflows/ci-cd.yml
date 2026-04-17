@@ -1,19 +1,22 @@
-name: CI-CD
+name: CI-CD Pipeline
 
 on:
   push:
+    branches:
+      - main
   pull_request:
-
+    branches:
+      - main
 
 jobs:
-
-  backend:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
+      # --- 1. BUILD BACKEND ---
       - name: Setup JDK 21
         uses: actions/setup-java@v4
         with:
@@ -24,46 +27,76 @@ jobs:
       - name: Grant execute permission
         run: chmod +x ./backend/gradlew
 
-      - name: Run backend tests
+      - name: Run Unit Tests
         working-directory: backend
         run: ./gradlew test
 
-  frontend:
-    runs-on: ubuntu-latest
+      - name: Build Backend JAR
+        if: github.ref == 'refs/heads/main'
+        working-directory: backend
+        run: ./gradlew bootJar -x test
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
+      # --- 2. BUILD FRONTEND ---
+      - name: Setup Node.js
+        if: github.ref == 'refs/heads/main'
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Build Frontend
+        if: github.ref == 'refs/heads/main'
         working-directory: frontend
-        run: npm ci
+        run: |
+          npm ci
+          npm run build
 
-      - name: Build frontend
-        working-directory: frontend
-        run: npm run build
+      # --- 3. UPLOAD FILES TO EC2 ---
+      - name: Copy files via SCP
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "backend/build/libs/*.jar,frontend/dist/*"
+          target: "/home/ubuntu/yomu-deploy"
 
-  deploy-staging:
-    if: github.ref == 'refs/heads/staging'
-    needs: [backend, frontend]
-    runs-on: ubuntu-latest
+      # --- 4. DEPLOY AND START SERVICES ON EC2 ---
+      - name: Execute deployment script via SSH
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
+          script: |
+            cd /home/ubuntu/yomu-deploy/backend/build/libs
 
-    steps:
-      - name: Dummy Deploy to Staging
-        run: echo "Deploying to STAGING environment..."
+            # Menyuntikkan Secrets ke file .env
+            echo "DB_URL=$DB_URL" > .env
+            echo "DB_USERNAME=$DB_USERNAME" >> .env
+            echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+            echo "JWT_SECRET=$JWT_SECRET" >> .env
+            echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
+            echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
 
-  deploy-production:
-    if: github.ref == 'refs/heads/main'
-    needs: [backend, frontend]
-    runs-on: ubuntu-latest
+            # Hentikan backend lama jika masih berjalan
+            pkill -f 'java -jar' || true
 
-    steps:
-      - name: Dummy Deploy to Production
-        run: echo "Deploying to PRODUCTION environment..."
+            # Nyalakan backend baru di background
+            nohup java -jar *.jar > /home/ubuntu/yomu-backend.log 2>&1 &
+
+            # Pindahkan frontend ke direktori public Nginx
+            sudo rm -rf /var/www/html/*
+            sudo cp -r /home/ubuntu/yomu-deploy/frontend/dist/* /var/www/html/
+            sudo systemctl restart nginx

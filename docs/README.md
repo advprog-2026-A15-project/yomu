@@ -1,41 +1,70 @@
-## 👥 Anggota Kelompok A15
+# Anggota Kelompok A15
+
 - M. Adella Fathir Supriadi (2406495640)
 - Ali Akbar Murthadha (2406495754)
 - Christna Yosua Rotinsulu (2406495691)
 - Nathanael Leander Herdanatra (2406421320)
 - Tirta Rendy Siahaan (2406355621)
 
-
-## 🌐 Deployment Link
+# Deployment Link
 
 [http://3.229.117.61/](http://3.229.117.61/)
 
-## 🖥️ Cara Setup Aplikasi
+# Docs Group Preparation
+
+Link : <a href="https://docs.google.com/document/d/1qXx9EYBr9EgFPy5gCOpMnVIi1kwDC42dGiQXf2kc2eI/edit?usp=sharing">Prep
+Group A15</a>
+
+# Cara Setup Aplikasi
 
 - Buka folder `backend` di IntelliJ IDEA Ultimate.
 - Lakukan setup Google OAuth2 Login sesuai docs di bawah.
-- Copy [`yomu/backend/src/main/resources/application.properties.example`](../backend/src/main/resources/application.properties.example) ke `yomu/backend/src/main/resources/application.properties`.
-- Isi [YOMU SECRET] dengan token JWT random yang bisa diperoleh [di sini.](https://randomkeygen.com/jwt-secret)
-- Isi [CLIENT ID] dan [CLIENT SECRET] dengan nilai yang diperoleh setelah setup Google OAuth2.
+- Copy [`backend/.env.example`](backend/.env.example) ke `backend/.env`.
+- Isi [DB_URL], [DB_USERNAME], dan [DB_PASSWORD] sesuai dengan database yang digunakan. Untuk setup database dengan
+  Supabase, lihat di bawah
+- Isi [JWT_SECRET] dengan token JWT random yang bisa diperoleh [di sini.](https://randomkeygen.com/jwt-secret)
+- Isi [GOOGLE_CLIENT_ID] dan [GOOGLE_CLIENT_SECRET] dengan nilai yang diperoleh setelah setup Google OAuth2.
 - Copy [`frontend/.env.example`](../frontend/.env.example) di folder frontend ke `frontend/.env.local`.
-- Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi [CLIENT ID] sebelumnya.
+- Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi [GOOGLE_CLIENT_ID] sebelumnya.
 - Jalankan/run BackendApplication (tombol segitiga hijau).
 - Buka folder `frontend` di terminal.
-- Pastikan terinstall NodeJS v24.13.1.
+- Pastikan terinstall NodeJS v24 ke atas.
 - Jalankan `npm install` lalu `npm run dev`
 - Buka alamat localhost yg keluar di browser
 
-# Docs Group Preparation
-Link : <a href="https://docs.google.com/document/d/1qXx9EYBr9EgFPy5gCOpMnVIi1kwDC42dGiQXf2kc2eI/edit?usp=sharing">Prep Group A15</a>
+## Cara Setup Database dengan Supabase
 
-# Integrasi Google OAuth2 Login
+1. Buka [Supabase](https://supabase.com/) dan buat akun jika belum punya.
+2. Setelah login, buat proyek baru dengan mengklik "New Project".
+3. Isi informasi proyek seperti nama, password, dan region, lalu klik "Create new project".
+4. Setelah proyek dibuat, tekan tombol "Connect" hijau di navbar.
+5. Pada sidebar yang muncul, pilih "Direct Connection string".
+6. Pada Connection Method, pilih "Transaction Pooler", dan pada Type, pilih JDBC.
+7. Copy connection string yang diberikan.
+8. Connection string berformat seperti ini:
+
+```
+jdbc:postgresql://[URL-AWS-UNTUK-POOLER].supabase.com:[PORT]/postgres?user=[postgres.STRING-USER-TOKEN]&password=[YOUR-PASSWORD]
+```
+
+9. Ganti bagian setelah `?` dengan `prepareThreshold=0` sehingga menjadi:
+
+```
+jdbc:postgresql://[URL-AWS-UNTUK-POOLER].supabase.com:[PORT]/postgres?prepareThreshold=0
+```
+
+Ini akan menjadi `DB_URL` yang akan digunakan di file `.env`.
+
+10. Masih di `.env`, isi `DB_USERNAME` dengan `postgres.STRING-USER-TOKEN` yang ada di URL dan `DB_PASSWORD` dengan
+    password yang sudah dibuat saat setup proyek di Supabase.
+
+## Integrasi Google OAuth2 Login
+
 Google OAuth2 memungkinkan pengguna login menggunakan akun Google tanpa perlu membuat akun baru di aplikasi.
 Google Cloud Console:  
 https://console.cloud.google.com/
 
----
-
-# 1. Prasyarat
+### 1. Prasyarat
 
 Pastikan beberapa hal berikut sudah tersedia:
 
@@ -51,9 +80,7 @@ implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 Dependency ini digunakan untuk mengaktifkan fitur **OAuth2 Client** pada Spring Security.
 
----
-
-# 2. Membuat Project di Google Cloud Console
+### 2. Membuat Project di Google Cloud Console
 
 1. Buka halaman berikut:
 
@@ -74,9 +101,7 @@ https://console.cloud.google.com/
 
 Setelah project berhasil dibuat, pilih project tersebut.
 
----
-
-# 3. Konfigurasi OAuth Consent Screen
+### 3. Konfigurasi OAuth Consent Screen
 
 1. Masuk ke menu:
 
@@ -100,9 +125,7 @@ External
 
 OAuth Consent Screen digunakan untuk menampilkan halaman izin ketika pengguna login menggunakan Google.
 
----
-
-# 4. Membuat OAuth Client ID
+### 4. Membuat OAuth Client ID
 
 Masuk ke menu:
 
@@ -114,29 +137,13 @@ Langkah selanjutnya:
 
 1. Klik **Create Credentials**
 2. Pilih **OAuth client ID**
-3. Pilih tipe aplikasi:
-
-```
-Web Application
-```
-
+3. Pilih tipe aplikasi: Web Application
 4. Isi konfigurasi berikut.
 
-### Authorized JavaScript Origins
+- Authorized JavaScript Origins: `http://localhost:8080` dan `http://localhost:5173` (untuk frontend)
+- Authorized Redirect URIs: `http://localhost:8080/login/oauth2/code/google`
 
-```
-http://localhost:8080
-```
-
-### Authorized Redirect URIs
-
-```
-http://localhost:8080/login/oauth2/code/google
-```
-
-Redirect URI adalah endpoint yang akan menerima respons dari Google setelah pengguna berhasil login.
-
-5. Klik **Create**
+### 5. Klik **Create**
 
 Setelah selesai, Google akan memberikan:
 
@@ -149,8 +156,7 @@ Simpan kedua nilai tersebut.
 
 ---
 
-
-# 6. Alur OAuth2 Login
+### 6. Alur OAuth2 Login
 
 Alur autentikasi Google OAuth2 adalah sebagai berikut:
 
@@ -167,13 +173,11 @@ Diagram sederhana flow OAuth2:
 User → Google Authorization Server → Access Token → Application
 ```
 
----
-
-# 7. Endpoint Default Spring Security
+### 7. Endpoint Default Spring Security
 
 Spring Boot menyediakan endpoint OAuth2 secara otomatis.
 
-### Endpoint Login
+#### Endpoint Login
 
 ```
 /oauth2/authorization/google
@@ -181,7 +185,7 @@ Spring Boot menyediakan endpoint OAuth2 secara otomatis.
 
 Endpoint ini digunakan untuk memulai proses login dengan Google.
 
-### Redirect Endpoint
+#### Redirect Endpoint
 
 ```
 /login/oauth2/code/google
@@ -189,9 +193,7 @@ Endpoint ini digunakan untuk memulai proses login dengan Google.
 
 Endpoint ini digunakan untuk menerima respons dari Google setelah autentikasi berhasil.
 
----
-
-# 8. Testing Login
+### 8. Testing Login
 
 Jalankan aplikasi Spring Boot:
 
@@ -209,9 +211,9 @@ Jika konfigurasi berhasil, halaman login Google akan muncul.
 
 ---
 
-# 9. Troubleshooting
+### 9. Troubleshooting
 
-### redirect_uri_mismatch
+#### redirect_uri_mismatch
 
 Pastikan URI berikut sama persis antara Google Console dan aplikasi.
 
@@ -219,15 +221,11 @@ Pastikan URI berikut sama persis antara Google Console dan aplikasi.
 http://localhost:8080/login/oauth2/code/google
 ```
 
----
-
-### access_denied
+#### access_denied
 
 Tambahkan email pengguna ke daftar **Test Users** pada OAuth Consent Screen.
 
----
-
-# 10. Referensi
+### 10. Referensi
 
 Google Cloud Console  
 https://console.cloud.google.com/

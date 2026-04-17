@@ -1,5 +1,0 @@
-ALTER TABLE comment
-    ADD parent_id UUID;
-
-ALTER TABLE comment
-    ADD CONSTRAINT FK_COMMENT_ON_PARENT FOREIGN KEY (parent_id) REFERENCES comment (id);
