@@ -13,7 +13,6 @@ CREATE TABLE quiz
     jawaban_benar VARCHAR(255) NOT NULL
 );
 
--- Memasukkan 1 Data Bacaan dan 1 Kuis untuk POC 25%
 INSERT INTO bacaan (id, judul, isi_teks)
 VALUES ('11111111-1111-1111-1111-111111111111', 'Pentingnya Literasi Digital',
         'Literasi digital membantu kita menyaring informasi yang salah atau hoax.');
