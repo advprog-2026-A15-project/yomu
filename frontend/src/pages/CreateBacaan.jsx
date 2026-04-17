@@ -3,10 +3,10 @@ import {Link, useNavigate} from 'react-router-dom';
 import {getToken} from '../services/authService';
 
 const CreateBacaan = () => {
-    const [form, setForm] = useState({judul: '', isiTeks: ''});
-    const [error, setError] = useState('');
-    const [saving, setSaving] = useState(false);
-    const navigate = useNavigate();
+  const [form, setForm] = useState({ judul: '', isiTeks: '', kategori: '' });
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -49,51 +49,49 @@ const CreateBacaan = () => {
         }
     };
 
-    return (
-        <div className="page-container" style={{alignItems: 'center', justifyContent: 'center'}}>
-            <div className="form-card">
-                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>← Kembali</Link>
-                <h2 style={{color: 'var(--lavender)', margin: '20px 0'}}>Tambah Bacaan Baru</h2>
-                <form onSubmit={handleSave} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                    <input
-                        className="input-entry"
-                        placeholder="Judul"
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            backgroundColor: 'var(--base)',
-                            color: 'var(--text)',
-                            border: '2px solid var(--surface1)',
-                            borderRadius: '8px'
-                        }}
-                        value={form.judul}
-                        onChange={(e) => setForm({...form, judul: e.target.value})}
-                        required
-                    />
-                    <textarea
-                        className="input-entry"
-                        rows="8"
-                        placeholder="Konten"
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            backgroundColor: 'var(--base)',
-                            color: 'var(--text)',
-                            border: '2px solid var(--surface1)',
-                            borderRadius: '8px'
-                        }}
-                        value={form.isiTeks}
-                        onChange={(e) => setForm({...form, isiTeks: e.target.value})}
-                        required
-                    />
-                    {error && <div className="status-error">{error}</div>}
-                    <button type="submit" className="btn btn-edit" disabled={saving}>
-                        {saving ? 'Menyimpan...' : 'Simpan'}
-                    </button>
-                </form>
-            </div>
-        </div>
-    );
+  return (
+    <div className="page-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <div className="form-card">
+        <Link to="/" style={{ color: 'var(--blue)', textDecoration: 'none' }}>← Kembali</Link>
+        <h2 style={{ color: 'var(--lavender)', margin: '20px 0' }}>Tambah Bacaan Baru</h2>
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <input
+            className="input-entry"
+            placeholder="Judul"
+            style={{ width: '100%', padding: '12px', backgroundColor: 'var(--base)', color: 'var(--text)', border: '2px solid var(--surface1)', borderRadius: '8px' }}
+            value={form.judul}
+            onChange={(e) => setForm({ ...form, judul: e.target.value })}
+            required
+          />
+          <textarea
+            className="input-entry"
+            rows="8"
+            placeholder="Konten"
+            style={{ width: '100%', padding: '12px', backgroundColor: 'var(--base)', color: 'var(--text)', border: '2px solid var(--surface1)', borderRadius: '8px' }}
+            value={form.isiTeks}
+            onChange={(e) => setForm({ ...form, isiTeks: e.target.value })}
+            required
+          />
+          <select
+            className="input-entry"
+            style={{ width: '100%', padding: '12px', backgroundColor: 'var(--base)', color: 'var(--text)', border: '2px solid var(--surface1)', borderRadius: '8px' }}
+            value={form.kategori}
+            onChange={(e) => setForm({ ...form, kategori: e.target.value })}
+            required
+          >
+            <option value="" disabled>-- Pilih Kategori --</option>
+            <option value="Edukasi">Edukasi</option>
+            <option value="Sejarah">Sejarah</option>
+            <option value="Sains">Sains</option>
+          </select>
+          {error && <div className="status-error">{error}</div>}
+          <button type="submit" className="btn btn-edit" disabled={saving}>
+            {saving ? 'Menyimpan...' : 'Simpan'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default CreateBacaan;

@@ -25,6 +25,9 @@ public class Bacaan {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String isiTeks;
 
+    @Column(name = "kategori")
+    private String kategori;
+
     // 👇 Tambahan relasi agar Kuis ikut terkirim ke Frontend 👇
     @OneToMany(mappedBy = "bacaan", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference // Mencegah infinite loop (JSON muter-muter)
