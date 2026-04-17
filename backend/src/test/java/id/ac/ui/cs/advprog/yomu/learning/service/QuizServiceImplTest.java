@@ -13,11 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +36,7 @@ class QuizServiceImplTest {
     private QuizServiceImpl quizService;
 
     private UUID bacaanId;
+    private UUID quizId;
     private Quiz dummyQuiz;
 
     @BeforeEach
@@ -43,12 +44,13 @@ class QuizServiceImplTest {
         SecurityContextHolder.clearContext();
 
         bacaanId = UUID.randomUUID();
+        quizId = UUID.randomUUID();
 
         Bacaan dummyBacaan = new Bacaan();
         dummyBacaan.setId(bacaanId);
 
         dummyQuiz = new Quiz();
-        dummyQuiz.setId(UUID.randomUUID());
+        dummyQuiz.setId(quizId);
         dummyQuiz.setBacaan(dummyBacaan);
         dummyQuiz.setPertanyaan("Apa ini?");
         dummyQuiz.setJawabanBenar("hoax");
@@ -56,25 +58,29 @@ class QuizServiceImplTest {
 
     @Test
     void testCekJawabanKuis_KuisTidakDitemukan() {
-        when(quizRepository.findByBacaanId(bacaanId)).thenReturn(new ArrayList<>());
+        UUID missingQuizId = UUID.randomUUID();
+        when(quizRepository.findById(missingQuizId)).thenReturn(Optional.empty());
 
-        String result = quizService.cekJawabanKuis(bacaanId, "jawaban");
-        assertEquals("Kuis tidak ditemukan untuk bacaan ini.", result);
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> quizService.cekJawabanKuis(missingQuizId, "jawaban")
+        );
+        assertEquals("Soal Kuis tidak ditemukan", exception.getMessage());
     }
 
     @Test
     void testCekJawabanKuis_JawabanBenar() {
-        when(quizRepository.findByBacaanId(bacaanId)).thenReturn(List.of(dummyQuiz));
+        when(quizRepository.findById(quizId)).thenReturn(Optional.of(dummyQuiz));
 
-        String result = quizService.cekJawabanKuis(bacaanId, "Ini berita hoax");
-        assertEquals("Benar! Kuis selesai.", result);
+        String result = quizService.cekJawabanKuis(quizId, "Ini berita hoax");
+        assertEquals("Benar!", result);
     }
 
     @Test
     void testCekJawabanKuis_JawabanSalah() {
-        when(quizRepository.findByBacaanId(bacaanId)).thenReturn(List.of(dummyQuiz));
+        when(quizRepository.findById(quizId)).thenReturn(Optional.of(dummyQuiz));
 
-        String result = quizService.cekJawabanKuis(bacaanId, "jawaban yang salah");
+        String result = quizService.cekJawabanKuis(quizId, "jawaban yang salah");
         assertEquals("Salah! Silakan coba lagi.", result);
     }
 }

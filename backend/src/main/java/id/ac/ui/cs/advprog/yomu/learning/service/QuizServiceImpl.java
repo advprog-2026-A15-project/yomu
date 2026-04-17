@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,8 +63,7 @@ public class QuizServiceImpl implements QuizService {
         Bacaan bacaan = bacaanRepository.findById(bacaanId)
                 .orElseThrow(() -> new RuntimeException("Bacaan tidak ditemukan"));
 
-        // Simpan riwayat pengerjaan.
-        // INILAH YANG AKAN MEMICU ATURAN "TIDAK BISA MEMBACA KUIS LAGI" MILIKMU!
+        // Simpan riwayat pengerjaan
         for (Quiz q : bacaan.getQuizzes()) {
             if (!quizAttemptRepository.existsByUserIdAndQuizId(currentUser.getId(), q.getId())) {
                 QuizAttempt attempt = new QuizAttempt();
@@ -75,8 +73,8 @@ public class QuizServiceImpl implements QuizService {
             }
         }
 
-        // Buka achievement
-        achievementService.unlockFirstReadAchievement(currentUser);
+        // Catat bacaan selesai agar progress achievement terbarui.
+        achievementService.recordCompletedReading(currentUser, bacaanId);
     }
 
     // --- CRUD KUIS ---
