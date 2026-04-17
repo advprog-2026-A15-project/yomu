@@ -60,7 +60,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "backend/build/libs/*.jar,frontend/dist/*"
+          source: "backend/build/libs/*.jar,frontend/dist/*,deploy.sh"
           target: "/home/ubuntu/yomu-deploy"
 
       # --- 4. DEPLOY AND START SERVICES ON EC2 ---
@@ -80,30 +80,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
-            cd /home/ubuntu/yomu-deploy/backend/build/libs
+            cd /home/ubuntu/yomu-deploy
             
-            # Menyuntikkan Secrets ke file .env
-            echo "DB_URL=$DB_URL" > .env
-            echo "DB_USERNAME=$DB_USERNAME" >> .env
-            echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-            echo "JWT_SECRET=$JWT_SECRET" >> .env
-            echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
-            echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
+            # Beri izin eksekusi pada script
+            chmod +x deploy.sh
             
-            # Hentikan backend lama jika masih berjalan
-            pkill -f 'java -jar' || true
-            sleep 3
-            
-            # Hapus file -plain.jar buatan Spring Boot agar perintah *.jar tidak bentrok
-            rm -f *-plain.jar
-            
-            # Gunakan 'setsid' alih-alih 'nohup' untuk memutus ikatan proses secara absolut dari sesi SSH
-            setsid java -jar *.jar > /home/ubuntu/yomu-backend.log 2>&1 < /dev/null &
-            
-            # Pindahkan frontend ke direktori public Nginx
-            sudo rm -rf /var/www/html/*
-            sudo cp -r /home/ubuntu/yomu-deploy/frontend/dist/* /var/www/html/
-            sudo systemctl restart nginx
-            
-            # Paksa sesi SSH untuk sukses dan keluar
-            exit 0
+            # Jalankan script
+            ./deploy.sh
