@@ -1,6 +1,9 @@
 package id.ac.ui.cs.advprog.yomu.authentication.controller;
 
-import id.ac.ui.cs.advprog.yomu.authentication.dto.request.*;
+import id.ac.ui.cs.advprog.yomu.authentication.dto.request.GoogleAuthRequest;
+import id.ac.ui.cs.advprog.yomu.authentication.dto.request.LoginRequest;
+import id.ac.ui.cs.advprog.yomu.authentication.dto.request.RegisterRequest;
+import id.ac.ui.cs.advprog.yomu.authentication.dto.request.UpdateRequest;
 import id.ac.ui.cs.advprog.yomu.authentication.dto.response.AuthResponse;
 import id.ac.ui.cs.advprog.yomu.authentication.dto.response.UserResponse;
 import id.ac.ui.cs.advprog.yomu.authentication.service.AuthService;

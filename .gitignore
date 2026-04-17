@@ -13,8 +13,13 @@ frontend/dist/
 .eslintcache
 
 # Environment & Secrets
-.env
-application.properties
+.env*
+!.env.example
+
+# Secrets
+*.key
+*.pem
+*.googleusercontent.com.json
 
 # OS
 .DS_Store

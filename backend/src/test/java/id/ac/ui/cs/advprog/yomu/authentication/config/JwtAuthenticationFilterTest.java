@@ -22,25 +22,19 @@ import static org.mockito.Mockito.*;
 
 class JwtAuthenticationFilterTest {
 
-    @Mock
-    private JwtService jwtService;
-
-    @Mock
-    private CustomUserDetailsService userDetailsService;
-
-    @Mock
-    private FilterChain filterChain;
-
-    @Mock
-    private HttpServletResponse response;
-
-    @InjectMocks
-    private JwtAuthenticationFilter filter;
-
-    private MockHttpServletRequest request;
-
     private final String token = "token";
     private final String username = "user";
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private CustomUserDetailsService userDetailsService;
+    @Mock
+    private FilterChain filterChain;
+    @Mock
+    private HttpServletResponse response;
+    @InjectMocks
+    private JwtAuthenticationFilter filter;
+    private MockHttpServletRequest request;
 
     @BeforeEach
     void setup() {

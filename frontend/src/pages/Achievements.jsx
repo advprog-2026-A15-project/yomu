@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, logout } from '../services/authService';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 export default function Achievements() {
   const navigate = useNavigate();

@@ -4,6 +4,8 @@ import id.ac.ui.cs.advprog.yomu.authentication.model.User;
 import id.ac.ui.cs.advprog.yomu.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.yomu.clan.dto.ClanResponse;
 import id.ac.ui.cs.advprog.yomu.clan.dto.CreateClanRequest;
+import id.ac.ui.cs.advprog.yomu.clan.dto.LeaderboardEntryResponse;
+import id.ac.ui.cs.advprog.yomu.clan.model.LeagueTier;
 import id.ac.ui.cs.advprog.yomu.clan.service.ClanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,16 @@ public class ClanController {
     @PostMapping("/{clanId}/join")
     public ClanResponse joinClan(@PathVariable Long clanId) {
         return clanService.joinClan(clanId, getCurrentUser());
+    }
+
+    @GetMapping("/leaderboard")
+    public List<LeaderboardEntryResponse> getLeaderboard(@RequestParam LeagueTier league) {
+        return clanService.getLeaderboard(league, getCurrentUser());
+    }
+
+    @GetMapping("/leaderboard/me")
+    public LeaderboardEntryResponse getMyLeaderboard() {
+        return clanService.getMyLeaderboard(getCurrentUser());
     }
 
     private User getCurrentUser() {
