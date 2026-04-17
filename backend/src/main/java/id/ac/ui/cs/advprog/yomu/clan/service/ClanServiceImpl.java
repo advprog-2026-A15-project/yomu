@@ -5,8 +5,10 @@ import id.ac.ui.cs.advprog.yomu.authentication.model.Role;
 import id.ac.ui.cs.advprog.yomu.authentication.model.User;
 import id.ac.ui.cs.advprog.yomu.clan.dto.ClanResponse;
 import id.ac.ui.cs.advprog.yomu.clan.dto.CreateClanRequest;
+import id.ac.ui.cs.advprog.yomu.clan.dto.LeaderboardEntryResponse;
 import id.ac.ui.cs.advprog.yomu.clan.model.Clan;
 import id.ac.ui.cs.advprog.yomu.clan.model.ClanMember;
+import id.ac.ui.cs.advprog.yomu.clan.model.LeagueTier;
 import id.ac.ui.cs.advprog.yomu.clan.repository.ClanMemberRepository;
 import id.ac.ui.cs.advprog.yomu.clan.repository.ClanRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -22,6 +25,7 @@ public class ClanServiceImpl implements ClanService {
 
     private final ClanRepository clanRepository;
     private final ClanMemberRepository clanMemberRepository;
+    private final ClanScoreService clanScoreService;
 
     @Override
     @Transactional(readOnly = true)
@@ -54,6 +58,8 @@ public class ClanServiceImpl implements ClanService {
         clan.setName(clanName);
         clan.setDescription(request.getDescription());
         clan.setOwner(currentUser);
+        clan.setCurrentLeague(LeagueTier.BRONZE);
+        clan.setCurrentSeasonPoints(0);
         clan = clanRepository.save(clan);
 
         ClanMember ownerMembership = new ClanMember();
@@ -82,6 +88,38 @@ public class ClanServiceImpl implements ClanService {
         return toResponse(clan, currentUser);
     }
 
+    @Override
+    @Transactional
+    public List<LeaderboardEntryResponse> getLeaderboard(LeagueTier leagueTier, User currentUser) {
+        assertPelajar(currentUser);
+        clanScoreService.refreshAllClanScores();
+        List<Clan> clans = clanRepository.findAllByCurrentLeagueOrderByCurrentSeasonPointsDescCreatedAtAsc(leagueTier);
+        return toLeaderboardEntries(clans);
+    }
+
+    @Override
+    @Transactional
+    public LeaderboardEntryResponse getMyLeaderboard(User currentUser) {
+        assertPelajar(currentUser);
+        clanScoreService.refreshAllClanScores();
+        List<Clan> myClans = clanMemberRepository.findAllByUser(currentUser).stream()
+                .map(ClanMember::getClan)
+                .toList();
+        if (myClans.isEmpty()) {
+            throw new ResourceNotFoundException("Kamu belum bergabung ke clan mana pun");
+        }
+
+        Clan selectedClan = myClans.stream()
+                .max(Comparator.comparingLong(Clan::getCurrentSeasonPoints))
+                .orElseThrow(() -> new ResourceNotFoundException("Clan tidak ditemukan"));
+        List<Clan> leagueClans = clanRepository.findAllByCurrentLeagueOrderByCurrentSeasonPointsDescCreatedAtAsc(selectedClan.getCurrentLeague());
+        List<LeaderboardEntryResponse> entries = toLeaderboardEntries(leagueClans);
+        return entries.stream()
+                .filter(entry -> entry.getClanId().equals(selectedClan.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Peringkat clan tidak ditemukan"));
+    }
+
     private ClanResponse toResponse(Clan clan, User currentUser) {
         long memberCount = clanMemberRepository.countByClan(clan);
         boolean joined = clanMemberRepository.existsByClanAndUser(clan, currentUser);
@@ -92,8 +130,26 @@ public class ClanServiceImpl implements ClanService {
                 clan.getOwner().getUsername(),
                 memberCount,
                 joined,
+                clan.getCurrentLeague(),
+                clan.getCurrentSeasonPoints(),
+                clan.getLastSeasonRank(),
                 clan.getCreatedAt()
         );
+    }
+
+    private List<LeaderboardEntryResponse> toLeaderboardEntries(List<Clan> clans) {
+        return java.util.stream.IntStream.range(0, clans.size())
+                .mapToObj(index -> {
+                    Clan clan = clans.get(index);
+                    return new LeaderboardEntryResponse(
+                            clan.getId(),
+                            clan.getName(),
+                            clan.getCurrentLeague(),
+                            clan.getCurrentSeasonPoints(),
+                            index + 1
+                    );
+                })
+                .toList();
     }
 
     private void assertPelajar(User currentUser) {

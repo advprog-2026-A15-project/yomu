@@ -1,8 +1,8 @@
-import {useEffect, useState} from 'react';
-import {Link, useParams} from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 
 export default function DetailBacaanKuis() {
-    const {id} = useParams();
+    const { id } = useParams();
     const [bacaan, setBacaan] = useState(null);
     const [jawaban, setJawaban] = useState('');
     const [hasilKuis, setHasilKuis] = useState(null);
@@ -33,16 +33,15 @@ export default function DetailBacaanKuis() {
             .catch(err => console.error("Gagal submit kuis:", err));
     };
 
-    if (!bacaan) return <div style={{color: 'var(--text)', textAlign: 'center', marginTop: '50px'}}>Loading
-        teks...</div>;
+    if (!bacaan) return <div style={{ color: 'var(--text)', textAlign: 'center', marginTop: '50px' }}>Loading teks...</div>;
 
     return (
-        <div className="page-container" style={{alignItems: 'center', padding: '20px'}}>
-            <div className="form-card" style={{maxWidth: '800px', width: '100%'}}>
-                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>← Kembali ke Daftar</Link>
+        <div className="page-container" style={{ alignItems: 'center', padding: '20px' }}>
+            <div className="form-card" style={{ maxWidth: '800px', width: '100%' }}>
+                <Link to="/" style={{ color: 'var(--blue)', textDecoration: 'none' }}>← Kembali ke Daftar</Link>
 
                 {/* Bagian Teks Bacaan */}
-                <h1 style={{color: 'var(--lavender)', marginTop: '20px'}}>{bacaan.judul}</h1>
+                <h1 style={{ color: 'var(--lavender)', marginTop: '20px' }}>{bacaan.judul}</h1>
                 <div style={{
                     backgroundColor: 'var(--base)',
                     padding: '20px',
@@ -56,14 +55,9 @@ export default function DetailBacaanKuis() {
                 </div>
 
                 {/* Bagian Kuis POC */}
-                <div style={{
-                    marginTop: '40px',
-                    padding: '20px',
-                    backgroundColor: 'var(--surface0)',
-                    borderRadius: '8px'
-                }}>
-                    <h3 style={{color: 'var(--peach, orange)', marginBottom: '15px'}}>Kuis Pemahaman</h3>
-                    <p style={{color: 'var(--text)', fontSize: '18px', marginBottom: '15px'}}>
+                <div style={{ marginTop: '40px', padding: '20px', backgroundColor: 'var(--surface0)', borderRadius: '8px' }}>
+                    <h3 style={{ color: 'var(--peach, orange)', marginBottom: '15px' }}>Kuis Pemahaman</h3>
+                    <p style={{ color: 'var(--text)', fontSize: '18px', marginBottom: '15px' }}>
                         {/* Mengambil elemen kuis pertama (indeks 0) dari array quizzes */}
                         {bacaan.quizzes?.[0]?.pertanyaan || "⚠️ Pertanyaan belum terkirim dari Backend API"}
                     </p>
@@ -82,25 +76,17 @@ export default function DetailBacaanKuis() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmitKuis} style={{display: 'flex', gap: '10px'}}>
+                    <form onSubmit={handleSubmitKuis} style={{ display: 'flex', gap: '10px' }}>
                         <input
                             type="text"
                             className="input-entry"
                             placeholder="Ketik jawaban Anda di sini (Hint: cari kata 'hoax')"
-                            style={{
-                                flex: 1,
-                                padding: '12px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--surface1)',
-                                backgroundColor: 'var(--base)',
-                                color: 'var(--text)'
-                            }}
+                            style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid var(--surface1)', backgroundColor: 'var(--base)', color: 'var(--text)' }}
                             value={jawaban}
                             onChange={e => setJawaban(e.target.value)}
                             required
                         />
-                        <button type="submit" className="btn"
-                                style={{backgroundColor: 'var(--blue)', color: 'var(--base)', padding: '0 20px'}}>
+                        <button type="submit" className="btn" style={{ backgroundColor: 'var(--blue)', color: 'var(--base)', padding: '0 20px' }}>
                             Kirim Jawaban
                         </button>
                     </form>
