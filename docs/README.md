@@ -1,10 +1,10 @@
 ## 👥 Anggota Kelompok A15
+
 - M. Adella Fathir Supriadi (2406495640)
 - Ali Akbar Murthadha (2406495754)
 - Christna Yosua Rotinsulu (2406495691)
 - Nathanael Leander Herdanatra (2406421320)
 - Tirta Rendy Siahaan (2406355621)
-
 
 ## 🌐 Deployment Link
 
@@ -14,21 +14,24 @@
 
 - Buka folder `backend` di IntelliJ IDEA Ultimate.
 - Lakukan setup Google OAuth2 Login sesuai docs di bawah.
-- Copy [`yomu/backend/src/main/resources/application.properties.example`](../backend/src/main/resources/application.properties.example) ke `yomu/backend/src/main/resources/application.properties`.
-- Isi [YOMU SECRET] dengan token JWT random yang bisa diperoleh [di sini.](https://randomkeygen.com/jwt-secret)
-- Isi [CLIENT ID] dan [CLIENT SECRET] dengan nilai yang diperoleh setelah setup Google OAuth2.
+- Copy [`backend/.env.example`](backend/.env.example) ke `backend/.env`.
+- Isi [JWT_SECRET] dengan token JWT random yang bisa diperoleh [di sini.](https://randomkeygen.com/jwt-secret)
+- Isi [GOOGLE_CLIENT_ID] dan [GOOGLE_CLIENT_SECRET] dengan nilai yang diperoleh setelah setup Google OAuth2.
 - Copy [`frontend/.env.example`](../frontend/.env.example) di folder frontend ke `frontend/.env.local`.
-- Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi [CLIENT ID] sebelumnya.
+- Ubah `VITE_GOOGLE_CLIENT_ID` di`.env.local` menjadi [GOOGLE_CLIENT_ID] sebelumnya.
 - Jalankan/run BackendApplication (tombol segitiga hijau).
 - Buka folder `frontend` di terminal.
-- Pastikan terinstall NodeJS v24.13.1.
+- Pastikan terinstall NodeJS v24 ke atas.
 - Jalankan `npm install` lalu `npm run dev`
 - Buka alamat localhost yg keluar di browser
 
 # Docs Group Preparation
-Link : <a href="https://docs.google.com/document/d/1qXx9EYBr9EgFPy5gCOpMnVIi1kwDC42dGiQXf2kc2eI/edit?usp=sharing">Prep Group A15</a>
+
+Link : <a href="https://docs.google.com/document/d/1qXx9EYBr9EgFPy5gCOpMnVIi1kwDC42dGiQXf2kc2eI/edit?usp=sharing">Prep
+Group A15</a>
 
 # Integrasi Google OAuth2 Login
+
 Google OAuth2 memungkinkan pengguna login menggunakan akun Google tanpa perlu membuat akun baru di aplikasi.
 Google Cloud Console:  
 https://console.cloud.google.com/
@@ -148,7 +151,6 @@ Client Secret
 Simpan kedua nilai tersebut.
 
 ---
-
 
 # 6. Alur OAuth2 Login
 

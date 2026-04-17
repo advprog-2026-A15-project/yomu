@@ -14,7 +14,6 @@ frontend/dist/
 
 # Environment & Secrets
 .env
-application.properties
 
 # OS
 .DS_Store
