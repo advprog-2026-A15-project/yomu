@@ -2,12 +2,14 @@ package id.ac.ui.cs.advprog.yomu.learning.controller;
 
 import id.ac.ui.cs.advprog.yomu.learning.models.Bacaan;
 import id.ac.ui.cs.advprog.yomu.learning.service.BacaanService;
-import id.ac.ui.cs.advprog.yomu.learning.service.QuizService; // Import Interface Service
+import id.ac.ui.cs.advprog.yomu.learning.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/bacaan")
@@ -20,19 +22,16 @@ public class BacaanController {
     @Autowired
     private QuizService quizService;
 
+    // Menampilkan daftar bacaan. Kalau ada param ?kategori=Fiksi, maka akan difilter.
     @GetMapping
-    public List<Bacaan> getAll() {
-        return bacaanService.findAll();
-    }
-
-    @PostMapping
-    public Bacaan create(@RequestBody Bacaan bacaan) {
-        return bacaanService.create(bacaan);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable UUID id) {
-        bacaanService.delete(id);
+    public List<Bacaan> getAll(@RequestParam(required = false) String kategori) {
+        List<Bacaan> semuaBacaan = bacaanService.findAll();
+        if (kategori != null && !kategori.trim().isEmpty()) {
+            return semuaBacaan.stream()
+                    .filter(b -> kategori.equalsIgnoreCase(b.getKategori()))
+                    .collect(Collectors.toList());
+        }
+        return semuaBacaan;
     }
 
     @GetMapping("/{id}")
@@ -40,14 +39,25 @@ public class BacaanController {
         return bacaanService.findById(id);
     }
 
+    @PostMapping
+    public Bacaan create(@RequestBody Bacaan bacaan) {
+        return bacaanService.create(bacaan);
+    }
+
     @PutMapping("/{id}")
     public Bacaan update(@PathVariable UUID id, @RequestBody Bacaan bacaan) {
         return bacaanService.update(id, bacaan);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        bacaanService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{bacaanId}/kuis/submit")
-    public String submitKuis(@PathVariable UUID bacaanId, @RequestBody String jawabanUser) {
-        // Controller HANYA melempar data ke Service, lalu mengembalikan hasilnya
-        return quizService.cekJawabanKuis(bacaanId, jawabanUser);
+    public ResponseEntity<String> submitKuis(@PathVariable UUID bacaanId, @RequestBody String jawaban) {
+        String hasil = quizService.cekJawabanKuis(bacaanId, jawaban);
+        return ResponseEntity.ok(hasil);
     }
 }

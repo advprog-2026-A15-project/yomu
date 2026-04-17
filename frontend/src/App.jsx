@@ -15,9 +15,13 @@ import DetailBacaan from './pages/DetailBacaan';
 import CreateComment from './pages/CreateComment';
 import EditComment from './pages/EditComment';
 import DeleteConfirmComment from './pages/DeleteConfirmComment';
-import DetailBacaanKuis from './pages/DetailBacaanKuis';
 import Achievements from './pages/Achievements';
 import Clans from './pages/Clans';
+import CreateKuis from './pages/CreateKuis';
+import EditKuis from './pages/EditKuis';
+import DeleteConfirmKuis from './pages/DeleteConfirmKuis';
+import MulaiKuis from './pages/MulaiKuis';
+
 import './App.css';
 
 // Komponen untuk melindungi route yang memerlukan autentikasi
@@ -48,21 +52,21 @@ function App() {
                 <Route path="/login" element={<AuthRoute><Login/></AuthRoute>}/>
                 <Route path="/register" element={<AuthRoute><Register/></AuthRoute>}/>
 
-                {/* Route bacaan yang dilindungi */}
-                <Route path="/" element={<ProtectedRoute><ViewBacaan/></ProtectedRoute>}/>
-                <Route path="/create" element={<ProtectedRoute><CreateBacaan/></ProtectedRoute>}/>
-                <Route path="/edit/:id" element={<ProtectedRoute><EditBacaan/></ProtectedRoute>}/>
-                <Route path="/delete/:id" element={<ProtectedRoute><DeleteConfirmBacaan/></ProtectedRoute>}/>
-                <Route path="/baca/:id" element={<ProtectedRoute><DetailBacaanKuis/></ProtectedRoute>}/>
-                <Route path="/bacaan/:id" element={<ProtectedRoute><DetailBacaan/></ProtectedRoute>}/>
-                <Route path="/bacaan/:bacaanId/comment/new"
-                       element={<ProtectedRoute><CreateComment/></ProtectedRoute>}/>
-                <Route path="/bacaan/:bacaanId/comment/:commentId/edit"
-                       element={<ProtectedRoute><EditComment/></ProtectedRoute>}/>
-                <Route path="/bacaan/:bacaanId/comment/:commentId/delete"
-                       element={<ProtectedRoute><DeleteConfirmComment/></ProtectedRoute>}/>
-                <Route path="/achievements" element={<ProtectedRoute><Achievements/></ProtectedRoute>}/>
-                <Route path="/clans" element={<ProtectedRoute><Clans/></ProtectedRoute>}/>
+        {/* Route bacaan yang dilindungi */}
+        <Route path="/" element={<ProtectedRoute><ViewBacaan /></ProtectedRoute>} />
+        <Route path="/create" element={<ProtectedRoute><CreateBacaan /></ProtectedRoute>} />
+        <Route path="/edit/:id" element={<ProtectedRoute><EditBacaan /></ProtectedRoute>} />
+        <Route path="/delete/:id" element={<ProtectedRoute><DeleteConfirmBacaan /></ProtectedRoute>} />
+        <Route path="/bacaan/:id" element={<ProtectedRoute><DetailBacaan /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/comment/new" element={<ProtectedRoute><CreateComment /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/comment/:commentId/edit" element={<ProtectedRoute><EditComment /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/comment/:commentId/delete" element={<ProtectedRoute><DeleteConfirmComment /></ProtectedRoute>} />
+        <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+        <Route path="/clans" element={<ProtectedRoute><Clans /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/kuis/create" element={<ProtectedRoute><CreateKuis /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/kuis/:kuisId/edit" element={<ProtectedRoute><EditKuis /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/kuis/:kuisId/delete" element={<ProtectedRoute><DeleteConfirmKuis /></ProtectedRoute>} />
+        <Route path="/bacaan/:id/mulai-kuis" element={<ProtectedRoute><MulaiKuis /></ProtectedRoute>} />
 
 
                 {/* Fallback */}
