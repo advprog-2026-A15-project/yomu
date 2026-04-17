@@ -13,7 +13,8 @@ frontend/dist/
 .eslintcache
 
 # Environment & Secrets
-.env
+.env*
+!.env.example
 
 # OS
 .DS_Store
