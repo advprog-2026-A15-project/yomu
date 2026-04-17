@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUser, getRole, getToken, logout } from '../services/authService';
 
@@ -28,7 +28,7 @@ export default function Clans() {
     [clans]
   );
 
-  const loadClans = async (signal) => {
+  const loadClans = useCallback(async (signal) => {
     const token = getToken();
     if (!token) {
       navigate('/login');
@@ -67,9 +67,9 @@ export default function Clans() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
-  const loadLeaderboard = async (signal, league = selectedLeague) => {
+  const loadLeaderboard = useCallback(async (signal, league = selectedLeague) => {
     const token = getToken();
     if (!token) {
       navigate('/login');
@@ -131,9 +131,9 @@ export default function Clans() {
     } finally {
       setLeaderboardLoading(false);
     }
-  };
+  }, [navigate, selectedLeague]);
 
-  const loadCurrentUserRole = async (signal) => {
+  const loadCurrentUserRole = useCallback(async (signal) => {
     const token = getToken();
     if (!token) {
       return;
@@ -147,7 +147,7 @@ export default function Clans() {
       if (signal?.aborted) return;
       setIsAdmin(getRole() === 'ADMIN');
     }
-  };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -155,7 +155,7 @@ export default function Clans() {
     loadLeaderboard(controller.signal, selectedLeague);
     loadCurrentUserRole(controller.signal);
     return () => controller.abort();
-  }, [navigate, selectedLeague]);
+  }, [loadClans, loadLeaderboard, loadCurrentUserRole, selectedLeague]);
 
   const handleCreateClan = async (e) => {
     e.preventDefault();

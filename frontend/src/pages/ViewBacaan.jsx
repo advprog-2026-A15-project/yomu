@@ -28,24 +28,24 @@ export default function ViewBacaan() {
       return;
     }
 
-    async function load() {
+    const load = async () => {
       setLoading(true);
       setError(null);
 
       try {
-          let url = 'http://localhost:8080/api/bacaan';
-            if (kategoriTerpilih) {
-              url += `?kategori=${kategoriTerpilih}`;
-            }
+        let url = 'http://localhost:8080/api/bacaan';
+        if (kategoriTerpilih) {
+          url += `?kategori=${kategoriTerpilih}`;
+        }
 
-          const res = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            signal: controller.signal,
-          });
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
 
         if (res.status === 401 || res.status === 403) {
           logout();
@@ -53,41 +53,9 @@ export default function ViewBacaan() {
           return;
         }
 
-        async function load() {
-            setLoading(true);
-            setError(null);
-
-            try {
-                const res = await fetch('/api/bacaan', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    signal: controller.signal,
-                });
-
-                if (res.status === 401 || res.status === 403) {
-                    logout();
-                    navigate('/login');
-                    return;
-                }
-
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(text || 'Gagal memuat bacaan');
-                }
-
-                const data = await res.json();
-                setBacaans(Array.isArray(data) ? data : []);
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    console.error('Load bacaan error:', err);
-                    setError(err.message || 'Terjadi kesalahan saat memuat data');
-                }
-            } finally {
-                setLoading(false);
-            }
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || 'Gagal memuat bacaan');
         }
 
         const data = await res.json();
@@ -100,11 +68,11 @@ export default function ViewBacaan() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     load();
     return () => controller.abort();
-  }, [kategoriTerpilih]);;
+  }, [kategoriTerpilih, navigate]);
 
   return (
     <div className="page-container">

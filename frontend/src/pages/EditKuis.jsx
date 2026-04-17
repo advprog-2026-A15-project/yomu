@@ -20,9 +20,9 @@ export default function EditKuis() {
         .then(res => res.json())
         .then(data => {
             setForm({ pertanyaan: data.pertanyaan, jawabanBenar: data.jawabanBenar });
-            setLoading(false);
         })
-        .catch(() => setError('Gagal memuat kuis'));
+        .catch(() => setError('Gagal memuat kuis'))
+        .finally(() => setLoading(false));
     }, [kuisId]);
 
     const handleUpdate = async (e) => {
@@ -51,6 +51,7 @@ export default function EditKuis() {
             <div className="form-card">
                 <Link to={`/bacaan/${bacaanId}`} style={{ color: 'var(--blue)' }}>← Batal</Link>
                 <h2 style={{ color: 'var(--lavender)', margin: '20px 0' }}>Edit Kuis</h2>
+                {error ? <div className="status-error">{error}</div> : null}
                 <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <textarea
                         className="input-entry"

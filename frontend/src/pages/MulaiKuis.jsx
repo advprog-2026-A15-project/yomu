@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getToken } from '../services/authService';
 
@@ -86,7 +86,7 @@ export default function MulaiKuis() {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setIsFinished(true); // Tampilkan layar skor
-    } catch (err) {
+    } catch {
       alert("Gagal mengunci kuis.");
     } finally {
       setIsSubmitting(false);
