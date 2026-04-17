@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface BacaanRepository extends JpaRepository<Bacaan, UUID> {
+    List<Bacaan> findByKategori(String kategori);
 }
