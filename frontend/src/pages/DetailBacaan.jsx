@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getToken } from '../services/authService';
+import CommentItem from '../components/CommentItem';
+import { getCurrentUser, getToken } from '../services/authService';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -11,8 +12,35 @@ export default function DetailBacaan() {
   const [bacaan, setBacaan] = useState(null);
   const [comments, setComments] = useState([]);
   const [myAchievements, setMyAchievements] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const refreshComments = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+
+      const commentRes = await fetch(`${API_BASE}/api/comment`, { headers });
+
+      if (commentRes.status === 401 || commentRes.status === 403) {
+        navigate('/login');
+        return;
+      }
+
+      if (commentRes.ok) {
+        const commentData = await commentRes.json();
+        setComments(Array.isArray(commentData) ? commentData : []);
+      }
+    } catch {
+      // Refresh komentar tidak kritikal
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -68,8 +96,13 @@ export default function DetailBacaan() {
         setBacaan(bacaanData);
         setComments(Array.isArray(commentData) ? commentData : []);
 
-        setIsSubmittingQuiz(true);
-        setHasilKuis('');
+        try {
+          const userData = await getCurrentUser();
+          setCurrentUser(userData);
+        } catch {
+          setCurrentUser(null);
+        }
+
         try {
           const achievementRes = await fetch(`${API_BASE}/api/achievements/me`, { headers, signal: controller.signal });
           if (achievementRes.ok) {
@@ -93,7 +126,7 @@ export default function DetailBacaan() {
   }, [id, navigate]);
 
   const relatedComments = useMemo(
-    () => comments.filter((comment) => comment?.bacaan?.id === id || comment?.bacaanId === id),
+    () => comments.filter((comment) => (comment?.bacaan?.id === id || comment?.bacaanId === id) && !comment?.parentId),
     [comments, id]
   );
 
@@ -202,23 +235,13 @@ export default function DetailBacaan() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {relatedComments.map((comment) => (
-              <article key={comment.id} style={{ backgroundColor: 'var(--base)', border: '1px solid var(--surface1)', borderRadius: '10px', padding: '12px' }}>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{comment.isiKomentar}</p>
-                <small style={{ color: 'var(--subtext0)', display: 'block' }}>
-                  By: <strong>{comment.username || 'Unknown'}</strong>
-                </small>
-                <small style={{ color: 'var(--subtext0)' }}>
-                  {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
-                </small>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'flex-end' }}>
-                  <Link to={`/bacaan/${id}/comment/${comment.id}/edit`}>
-                    <button className="btn btn-edit" style={{ padding: '4px 12px', fontSize: '12px' }} type="button">Edit</button>
-                  </Link>
-                  <Link to={`/bacaan/${id}/comment/${comment.id}/delete`}>
-                    <button className="btn btn-delete" style={{ padding: '4px 12px', fontSize: '12px' }} type="button">Hapus</button>
-                  </Link>
-                </div>
-              </article>
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                bacaanId={id}
+                onCommentRefresh={refreshComments}
+                currentUser={currentUser}
+              />
             ))}
           </div>
         )}
