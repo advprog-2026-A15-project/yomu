@@ -3,7 +3,7 @@ import {Link, useNavigate, useParams} from 'react-router-dom';
 import {getCurrentUser, getToken} from '../services/authService';
 import CommentItem from '../components/CommentItem';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 export default function DetailBacaan() {
     const {id} = useParams();

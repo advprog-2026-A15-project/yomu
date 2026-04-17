@@ -23,7 +23,7 @@ export default function DeleteConfirmBacaan() {
             setLoading(true);
             setError('');
             try {
-                const res = await fetch(`http://localhost:8080/api/bacaan/${id}`, {
+                const res = await fetch(`/api/bacaan/${id}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ export default function DeleteConfirmBacaan() {
         setDeleting(true);
         setError('');
         try {
-            const res = await fetch(`http://localhost:8080/api/bacaan/${id}`, {
+            const res = await fetch(`/api/bacaan/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,

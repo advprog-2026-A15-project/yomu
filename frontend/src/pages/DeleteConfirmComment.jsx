@@ -2,7 +2,7 @@ import {Link, useNavigate, useParams} from 'react-router-dom';
 import {useState} from 'react';
 import {getToken} from '../services/authService';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 export default function DeleteConfirmComment() {
     const {commentId, bacaanId} = useParams();

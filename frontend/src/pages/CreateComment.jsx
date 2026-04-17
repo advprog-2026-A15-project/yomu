@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Link, useNavigate, useParams} from 'react-router-dom';
 import {getToken} from '../services/authService';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 export default function CreateComment() {
     const {bacaanId} = useParams();

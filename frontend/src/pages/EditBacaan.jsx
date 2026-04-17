@@ -23,7 +23,7 @@ const EditBacaan = () => {
             setLoading(true);
             setError('');
             try {
-                const res = await fetch(`http://localhost:8080/api/bacaan/${id}`, {
+                const res = await fetch(`/api/bacaan/${id}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ const EditBacaan = () => {
         setSaving(true);
         setError('');
         try {
-            const res = await fetch(`http://localhost:8080/api/bacaan/${id}`, {
+            const res = await fetch(`/api/bacaan/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

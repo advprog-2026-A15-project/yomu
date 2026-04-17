@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Link, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {getToken} from '../services/authService';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 async function readErrorMessage(res, fallbackMessage) {
     try {

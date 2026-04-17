@@ -52,3 +52,7 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+}

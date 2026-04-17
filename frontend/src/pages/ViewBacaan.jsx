@@ -32,7 +32,7 @@ export default function ViewBacaan() {
             setError(null);
 
             try {
-                const res = await fetch('http://localhost:8080/api/bacaan', {
+                const res = await fetch('/api/bacaan', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

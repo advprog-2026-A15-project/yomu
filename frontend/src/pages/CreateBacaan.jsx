@@ -21,7 +21,7 @@ const CreateBacaan = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8080/api/bacaan', {
+            const response = await fetch('/api/bacaan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
