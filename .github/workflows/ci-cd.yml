@@ -81,22 +81,19 @@ jobs:
           envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
             cd /home/ubuntu/yomu-deploy/backend/build/libs
-
-            # Menyuntikkan Secrets ke file .env
+            
             echo "DB_URL=$DB_URL" > .env
             echo "DB_USERNAME=$DB_USERNAME" >> .env
             echo "DB_PASSWORD=$DB_PASSWORD" >> .env
             echo "JWT_SECRET=$JWT_SECRET" >> .env
             echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
             echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
-
-            # Hentikan backend lama jika masih berjalan
+            
             pkill -f 'java -jar' || true
-
-            # Nyalakan backend baru di background
-            nohup java -jar *.jar > /home/ubuntu/yomu-backend.log 2>&1 &
-
-            # Pindahkan frontend ke direktori public Nginx
+            sleep 3 # Beri jeda 3 detik agar port 8080 benar-benar bebas
+            
+            nohup java -jar *.jar > /home/ubuntu/yomu-backend.log 2>&1 < /dev/null &
+            
             sudo rm -rf /var/www/html/*
             sudo cp -r /home/ubuntu/yomu-deploy/frontend/dist/* /var/www/html/
             sudo systemctl restart nginx

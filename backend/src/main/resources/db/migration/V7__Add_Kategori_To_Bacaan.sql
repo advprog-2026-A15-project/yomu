@@ -1,0 +1,3 @@
+ALTER TABLE bacaan
+    ADD COLUMN IF NOT EXISTS kategori VARCHAR(255);
+
