@@ -9,6 +9,7 @@ const truncate = (value, maxLength) => {
 
 export default function ViewBacaan() {
   const [bacaans, setBacaans] = useState([]);
+  const [kategoriTerpilih, setKategoriTerpilih] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -32,14 +33,19 @@ export default function ViewBacaan() {
       setError(null);
 
       try {
-        const res = await fetch('http://localhost:8080/api/bacaan', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          signal: controller.signal,
-        });
+          let url = 'http://localhost:8080/api/bacaan';
+            if (kategoriTerpilih) {
+              url += `?kategori=${kategoriTerpilih}`;
+            }
+
+          const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            signal: controller.signal,
+          });
 
         if (res.status === 401 || res.status === 403) {
           logout();
@@ -66,7 +72,7 @@ export default function ViewBacaan() {
 
     load();
     return () => controller.abort();
-  }, [navigate]);
+  }, [kategoriTerpilih]);;
 
   return (
     <div className="page-container">
@@ -93,6 +99,19 @@ export default function ViewBacaan() {
 
       {!loading && !error && (
         <section className="thread-list" aria-label="Daftar Bacaan">
+        <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <label style={{ color: 'var(--text)' }}>Filter Kategori:</label>
+          <select
+            value={kategoriTerpilih}
+            onChange={(e) => setKategoriTerpilih(e.target.value)}
+            style={{ padding: '8px', borderRadius: '5px', backgroundColor: 'var(--surface0)', color: 'var(--text)' }}
+          >
+            <option value="">Semua Kategori</option>
+            <option value="Edukasi">Edukasi</option>
+            <option value="Sejarah">Sejarah</option>
+            <option value="Sains">Sains</option>
+          </select>
+        </div>
           {bacaans.length === 0 && <div className="status-note">Belum ada bacaan.</div>}
 
           {bacaans.map((b) => (
@@ -101,6 +120,11 @@ export default function ViewBacaan() {
                 <div className="thread-meta" title={b.id}>
                   UUID: {b.id}
                 </div>
+                {b.kategori && (
+                    <span style={{ backgroundColor: 'var(--blue)', color: 'var(--base)', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+                      {b.kategori}
+                    </span>
+                )}
                 <h2 className="thread-title" title={b.judul || '-'}>
                   {truncate(b.judul, 72)}
                 </h2>

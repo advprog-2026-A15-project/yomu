@@ -17,6 +17,10 @@ import EditComment from './pages/EditComment';
 import DeleteConfirmComment from './pages/DeleteConfirmComment';
 import Achievements from './pages/Achievements';
 import Clans from './pages/Clans';
+import CreateKuis from './pages/CreateKuis';
+import EditKuis from './pages/EditKuis';
+import DeleteConfirmKuis from './pages/DeleteConfirmKuis';
+import MulaiKuis from './pages/MulaiKuis';
 
 import './App.css';
 
@@ -59,6 +63,10 @@ function App() {
         <Route path="/bacaan/:bacaanId/comment/:commentId/delete" element={<ProtectedRoute><DeleteConfirmComment /></ProtectedRoute>} />
         <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
         <Route path="/clans" element={<ProtectedRoute><Clans /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/kuis/create" element={<ProtectedRoute><CreateKuis /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/kuis/:kuisId/edit" element={<ProtectedRoute><EditKuis /></ProtectedRoute>} />
+        <Route path="/bacaan/:bacaanId/kuis/:kuisId/delete" element={<ProtectedRoute><DeleteConfirmKuis /></ProtectedRoute>} />
+        <Route path="/bacaan/:id/mulai-kuis" element={<ProtectedRoute><MulaiKuis /></ProtectedRoute>} />
 
 
         {/* Fallback */}

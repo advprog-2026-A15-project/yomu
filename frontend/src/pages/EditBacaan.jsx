@@ -4,7 +4,7 @@ import { getToken } from '../services/authService';
 
 const EditBacaan = () => {
   const { id } = useParams();
-  const [form, setForm] = useState({ judul: '', isiTeks: '' });
+  const [form, setForm] = useState({ judul: '', isiTeks: '', kategori: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -47,7 +47,13 @@ const EditBacaan = () => {
         }
 
         const data = await res.json();
-        setForm({ judul: data?.judul || '', isiTeks: data?.isiTeks || '' });
+        if (data) {
+          setForm({
+            judul: data.judul || '',
+            isiTeks: data.isiTeks || '',
+            kategori: data.kategori || ''
+          });
+        }
       } catch (err) {
         if (err.name !== 'AbortError') {
           setError(err.message || 'Terjadi kesalahan saat memuat data');
@@ -132,6 +138,18 @@ const EditBacaan = () => {
               onChange={(e) => setForm({ ...form, isiTeks: e.target.value })}
               required
             />
+            <select
+                className="input-entry"
+                style={{ width: '100%', padding: '12px', backgroundColor: 'var(--base)', color: 'var(--text)', border: '2px solid var(--surface1)', borderRadius: '8px' }}
+                value={form.kategori}
+                onChange={(e) => setForm({ ...form, kategori: e.target.value })}
+                required
+            >
+                <option value="" disabled>-- Pilih Kategori --</option>
+                <option value="Edukasi">Edukasi</option>
+                <option value="Sejarah">Sejarah</option>
+                <option value="Sains">Sains</option>
+            </select>
             <button type="submit" className="btn btn-edit" disabled={saving}>
               {saving ? 'Menyimpan...' : 'Simpan'}
             </button>

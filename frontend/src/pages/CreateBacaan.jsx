@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getToken } from '../services/authService';
 
 const CreateBacaan = () => {
-  const [form, setForm] = useState({ judul: '', isiTeks: '' });
+  const [form, setForm] = useState({ judul: '', isiTeks: '', kategori: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
@@ -72,6 +72,18 @@ const CreateBacaan = () => {
             onChange={(e) => setForm({ ...form, isiTeks: e.target.value })}
             required
           />
+          <select
+            className="input-entry"
+            style={{ width: '100%', padding: '12px', backgroundColor: 'var(--base)', color: 'var(--text)', border: '2px solid var(--surface1)', borderRadius: '8px' }}
+            value={form.kategori}
+            onChange={(e) => setForm({ ...form, kategori: e.target.value })}
+            required
+          >
+            <option value="" disabled>-- Pilih Kategori --</option>
+            <option value="Edukasi">Edukasi</option>
+            <option value="Sejarah">Sejarah</option>
+            <option value="Sains">Sains</option>
+          </select>
           {error && <div className="status-error">{error}</div>}
           <button type="submit" className="btn btn-edit" disabled={saving}>
             {saving ? 'Menyimpan...' : 'Simpan'}
