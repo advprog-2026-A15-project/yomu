@@ -81,7 +81,7 @@ jobs:
           envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
             cd /home/ubuntu/yomu-deploy/backend/build/libs
-
+            
             # Menyuntikkan Secrets ke file .env
             echo "DB_URL=$DB_URL" > .env
             echo "DB_USERNAME=$DB_USERNAME" >> .env
@@ -89,14 +89,21 @@ jobs:
             echo "JWT_SECRET=$JWT_SECRET" >> .env
             echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
             echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
-
+            
             # Hentikan backend lama jika masih berjalan
             pkill -f 'java -jar' || true
-
-            # Nyalakan backend baru di background
-            nohup java -jar *.jar > /home/ubuntu/yomu-backend.log 2>&1 &
-
+            sleep 3
+            
+            # Hapus file -plain.jar buatan Spring Boot agar perintah *.jar tidak bentrok
+            rm -f *-plain.jar
+            
+            # Gunakan 'setsid' alih-alih 'nohup' untuk memutus ikatan proses secara absolut dari sesi SSH
+            setsid java -jar *.jar > /home/ubuntu/yomu-backend.log 2>&1 < /dev/null &
+            
             # Pindahkan frontend ke direktori public Nginx
             sudo rm -rf /var/www/html/*
             sudo cp -r /home/ubuntu/yomu-deploy/frontend/dist/* /var/www/html/
             sudo systemctl restart nginx
+            
+            # Paksa sesi SSH untuk sukses dan keluar
+            exit 0
