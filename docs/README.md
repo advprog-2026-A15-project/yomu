@@ -8,7 +8,7 @@
 
 # Deployment Link
 
-[http://3.229.117.61/](http://3.229.117.61/)
+[http://54.198.1.224/](http://54.198.1.224/)
 
 # Docs Group Preparation
 
