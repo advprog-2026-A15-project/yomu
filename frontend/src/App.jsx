@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { getToken } from './services/authService';
+import {BrowserRouter as Router, Navigate, Route, Routes, useLocation} from 'react-router-dom';
+import {getToken} from './services/authService';
 
 // Halaman autentikasi
 import Login from './pages/Login';
@@ -25,32 +25,32 @@ import MulaiKuis from './pages/MulaiKuis';
 import './App.css';
 
 // Komponen untuk melindungi route yang memerlukan autentikasi
-const ProtectedRoute = ({ children }) => {
-  const token = getToken();
-  const location = useLocation();
+const ProtectedRoute = ({children}) => {
+    const token = getToken();
+    const location = useLocation();
 
-  if (!token) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-  return children;
+    if (!token) {
+        return <Navigate to="/login" replace state={{from: location}}/>;
+    }
+    return children;
 };
 
 // Komponen untuk route autentikasi (login/register) agar tidak bisa diakses jika sudah login
-const AuthRoute = ({ children }) => {
-  const token = getToken();
-  if (token) {
-    return <Navigate to="/" replace />;
-  }
-  return children;
+const AuthRoute = ({children}) => {
+    const token = getToken();
+    if (token) {
+        return <Navigate to="/" replace/>;
+    }
+    return children;
 };
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        {/* Route autentikasi */}
-        <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-        <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
+    return (
+        <Router>
+            <Routes>
+                {/* Route autentikasi */}
+                <Route path="/login" element={<AuthRoute><Login/></AuthRoute>}/>
+                <Route path="/register" element={<AuthRoute><Register/></AuthRoute>}/>
 
         {/* Route bacaan yang dilindungi */}
         <Route path="/" element={<ProtectedRoute><ViewBacaan /></ProtectedRoute>} />
@@ -69,11 +69,11 @@ function App() {
         <Route path="/bacaan/:id/mulai-kuis" element={<ProtectedRoute><MulaiKuis /></ProtectedRoute>} />
 
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
-  );
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace/>}/>
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

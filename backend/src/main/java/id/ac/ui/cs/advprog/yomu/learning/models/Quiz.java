@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.UUID;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

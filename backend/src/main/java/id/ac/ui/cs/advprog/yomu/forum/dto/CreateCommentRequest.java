@@ -1,25 +1,23 @@
 package id.ac.ui.cs.advprog.yomu.forum.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
+@Getter
+@Setter
 public class CreateCommentRequest {
+    @NotBlank(message = "Isi komentar tidak boleh kosong")
+    @Size(max = 1000, message = "Isi komentar maksimal 1000 karakter")
     private String isiKomentar;
+
+    @NotNull(message = "Bacaan wajib dipilih")
     private UUID bacaanId;
 
-    public String getIsiKomentar() {
-        return isiKomentar;
-    }
-
-    public void setIsiKomentar(String isiKomentar) {
-        this.isiKomentar = isiKomentar;
-    }
-
-    public UUID getBacaanId() {
-        return bacaanId;
-    }
-
-    public void setBacaanId(UUID bacaanId) {
-        this.bacaanId = bacaanId;
-    }
+    private UUID parentCommentId;
 }
 

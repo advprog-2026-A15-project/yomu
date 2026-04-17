@@ -9,7 +9,7 @@ export default function DetailBacaanKuis() {
 
     // Ambil data teks bacaan
     useEffect(() => {
-        fetch(`http://localhost:8080/api/bacaan/${id}`)
+        fetch(`/api/bacaan/${id}`)
             .then(res => res.json())
             .then(data => setBacaan(data))
             .catch(err => console.error("Gagal mengambil bacaan:", err));
@@ -18,7 +18,7 @@ export default function DetailBacaanKuis() {
     // Fungsi kirim jawaban kuis
     const handleSubmitKuis = (e) => {
         e.preventDefault();
-        fetch(`http://localhost:8080/api/bacaan/${id}/kuis/submit`, {
+        fetch(`/api/bacaan/${id}/kuis/submit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/plain' // Karena backend kita nerima String biasa

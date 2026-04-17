@@ -5,11 +5,12 @@ CREATE TABLE bacaan (
                         kategori VARCHAR(255)
 );
 
-CREATE TABLE quiz (
-                      id UUID PRIMARY KEY,
-                      bacaan_id UUID NOT NULL REFERENCES bacaan(id),
-                      pertanyaan TEXT NOT NULL,
-                      jawaban_benar VARCHAR(255) NOT NULL
+CREATE TABLE quiz
+(
+    id            UUID PRIMARY KEY,
+    bacaan_id     UUID         NOT NULL REFERENCES bacaan (id),
+    pertanyaan    TEXT         NOT NULL,
+    jawaban_benar VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE quiz_attempt (

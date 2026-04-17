@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { logout, getToken } from '../services/authService';
+import {useEffect, useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {getToken, logout} from '../services/authService';
 
 const truncate = (value, maxLength) => {
-  if (!value) return '-';
-  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+    if (!value) return '-';
+    return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
 };
 
 export default function ViewBacaan() {
@@ -53,9 +53,41 @@ export default function ViewBacaan() {
           return;
         }
 
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || 'Gagal memuat bacaan');
+        async function load() {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const res = await fetch('/api/bacaan', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    signal: controller.signal,
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    logout();
+                    navigate('/login');
+                    return;
+                }
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text || 'Gagal memuat bacaan');
+                }
+
+                const data = await res.json();
+                setBacaans(Array.isArray(data) ? data : []);
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Load bacaan error:', err);
+                    setError(err.message || 'Terjadi kesalahan saat memuat data');
+                }
+            } finally {
+                setLoading(false);
+            }
         }
 
         const data = await res.json();

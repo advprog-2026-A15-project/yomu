@@ -19,6 +19,8 @@ repositories {
 }
 
 dependencies {
+    val lombokVersion = "1.18.38"
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
@@ -35,8 +37,10 @@ dependencies {
 
     implementation("com.google.api-client:google-api-client:2.2.0")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
@@ -51,4 +55,8 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
 }

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { getToken } from '../services/authService';
+import {useEffect, useState} from 'react';
+import {Link, useNavigate, useParams} from 'react-router-dom';
+import {getToken} from '../services/authService';
 
 const EditBacaan = () => {
   const { id } = useParams();
@@ -36,14 +36,88 @@ const EditBacaan = () => {
           return;
         }
 
-        if (res.status === 404) {
-          setError('Bacaan tidak ditemukan.');
-          return;
+        const load = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const res = await fetch(`/api/bacaan/${id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    signal: controller.signal,
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    navigate('/login');
+                    return;
+                }
+
+                if (res.status === 404) {
+                    setError('Bacaan tidak ditemukan.');
+                    return;
+                }
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text || 'Gagal mengambil data bacaan');
+                }
+
+                const data = await res.json();
+                setForm({judul: data?.judul || '', isiTeks: data?.isiTeks || ''});
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    setError(err.message || 'Terjadi kesalahan saat memuat data');
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        load();
+        return () => controller.abort();
+    }, [id, navigate]);
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        const token = getToken();
+        if (!token) {
+            navigate('/login');
+            return;
         }
 
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || 'Gagal mengambil data bacaan');
+        setSaving(true);
+        setError('');
+        try {
+            const res = await fetch(`/api/bacaan/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(form),
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                navigate('/login');
+                return;
+            }
+
+            if (res.status === 404) {
+                setError('Bacaan tidak ditemukan.');
+                return;
+            }
+
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Gagal memperbarui bacaan');
+            }
+
+            navigate('/');
+        } catch (err) {
+            setError(err.message || 'Terjadi kesalahan saat menyimpan perubahan');
+        } finally {
+            setSaving(false);
         }
 
         const data = await res.json();

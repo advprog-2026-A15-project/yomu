@@ -68,6 +68,8 @@ export default function DetailBacaan() {
         setBacaan(bacaanData);
         setComments(Array.isArray(commentData) ? commentData : []);
 
+        setIsSubmittingQuiz(true);
+        setHasilKuis('');
         try {
           const achievementRes = await fetch(`${API_BASE}/api/achievements/me`, { headers, signal: controller.signal });
           if (achievementRes.ok) {
