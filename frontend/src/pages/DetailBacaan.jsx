@@ -1,251 +1,403 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {Link, useNavigate, useParams} from 'react-router-dom';
+import {getCurrentUser, getToken} from '../services/authService';
 import CommentItem from '../components/CommentItem';
-import { getCurrentUser, getToken } from '../services/authService';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 export default function DetailBacaan() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+    const {id} = useParams();
+    const navigate = useNavigate();
 
-  const [bacaan, setBacaan] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [myAchievements, setMyAchievements] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+    const [bacaan, setBacaan] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [newComment, setNewComment] = useState('');
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+    const [jawaban, setJawaban] = useState('');
+    const [hasilKuis, setHasilKuis] = useState('');
+    const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
+    const [myAchievements, setMyAchievements] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-  const refreshComments = async () => {
-    const token = getToken();
-    if (!token) return;
+    const unlockedAchievements = myAchievements.filter((achievement) => achievement?.unlocked);
 
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      };
+    const fetchCommentsOnly = useCallback(async () => {
+        const token = getToken();
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
-      const commentRes = await fetch(`${API_BASE}/api/comment`, { headers });
+        const res = await fetch(`${API_BASE}/api/comment`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-      if (commentRes.status === 401 || commentRes.status === 403) {
-        navigate('/login');
-        return;
-      }
+        if (res.status === 401 || res.status === 403) {
+            navigate('/login');
+            return;
+        }
 
-      if (commentRes.ok) {
-        const commentData = await commentRes.json();
-        setComments(Array.isArray(commentData) ? commentData : []);
-      }
-    } catch {
-      // Refresh komentar tidak kritikal
-    }
-  };
+        if (res.ok) {
+            const data = await res.json();
+            setComments(Array.isArray(data) ? data : []);
+        }
+    }, [navigate]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const token = getToken();
+    useEffect(() => {
+        let isMounted = true;
 
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+        getCurrentUser().then((user) => {
+            if (isMounted) {
+                setCurrentUser(user);
+            }
+        });
 
-    const load = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const token = getToken();
+
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
+        const load = async () => {
+            setLoading(true);
+            setError('');
+
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                };
+
+                const [bacaanRes, commentRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/bacaan/${id}`, {headers, signal: controller.signal}),
+                    fetch(`${API_BASE}/api/comment`, {headers, signal: controller.signal}),
+                ]);
+
+                if (
+                    bacaanRes.status === 401 ||
+                    bacaanRes.status === 403 ||
+                    commentRes.status === 401 ||
+                    commentRes.status === 403
+                ) {
+                    navigate('/login');
+                    return;
+                }
+
+                if (bacaanRes.status === 404) {
+                    setError('Bacaan tidak ditemukan.');
+                    return;
+                }
+
+                if (!bacaanRes.ok) {
+                    const text = await bacaanRes.text();
+                    setError(text || 'Gagal mengambil detail bacaan');
+                    return;
+                }
+
+                if (!commentRes.ok) {
+                    const text = await commentRes.text();
+                    setError(text || 'Gagal mengambil daftar komentar');
+                    return;
+                }
+
+                const bacaanData = await bacaanRes.json();
+                const commentData = await commentRes.json();
+                setBacaan(bacaanData);
+                setComments(Array.isArray(commentData) ? commentData : []);
+
+                try {
+                    const achievementRes = await fetch(`${API_BASE}/api/achievements/me`, {
+                        headers,
+                        signal: controller.signal,
+                    });
+
+                    if (achievementRes.ok) {
+                        const achievementData = await achievementRes.json();
+                        setMyAchievements(Array.isArray(achievementData) ? achievementData : []);
+                    }
+                } catch {
+                    // Achievement tidak kritikal untuk render halaman.
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    setError(err.message || 'Terjadi kesalahan saat memuat data.');
+                }
+            } finally {
+                setLoading(false);
+            }
         };
 
-        const [bacaanRes, commentRes] = await Promise.all([
-          fetch(`${API_BASE}/api/bacaan/${id}`, { headers, signal: controller.signal }),
-          fetch(`${API_BASE}/api/comment`, { headers, signal: controller.signal }),
-        ]);
+        load();
+        return () => controller.abort();
+    }, [id, navigate]);
 
-        if (
-          bacaanRes.status === 401 ||
-          bacaanRes.status === 403 ||
-          commentRes.status === 401 ||
-          commentRes.status === 403
-        ) {
-          navigate('/login');
-          return;
+    const handleSubmitKuis = async (e) => {
+        e.preventDefault();
+
+        const token = getToken();
+        if (!token) {
+            navigate('/login');
+            return;
         }
 
-        if (bacaanRes.status === 404) {
-          setError('Bacaan tidak ditemukan.');
-          return;
-        }
-
-        if (!bacaanRes.ok) {
-          const text = await bacaanRes.text();
-          throw new Error(text || 'Gagal mengambil detail bacaan');
-        }
-
-        if (!commentRes.ok) {
-          const text = await commentRes.text();
-          throw new Error(text || 'Gagal mengambil daftar komentar');
-        }
-
-        const bacaanData = await bacaanRes.json();
-        const commentData = await commentRes.json();
-
-        setBacaan(bacaanData);
-        setComments(Array.isArray(commentData) ? commentData : []);
-
+        setIsSubmittingQuiz(true);
+        setHasilKuis('');
         try {
-          const userData = await getCurrentUser();
-          setCurrentUser(userData);
-        } catch {
-          setCurrentUser(null);
-        }
+            const res = await fetch(`${API_BASE}/api/bacaan/${id}/kuis/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: jawaban,
+            });
 
-        try {
-          const achievementRes = await fetch(`${API_BASE}/api/achievements/me`, { headers, signal: controller.signal });
-          if (achievementRes.ok) {
-            const achievementData = await achievementRes.json();
-            setMyAchievements(Array.isArray(achievementData) ? achievementData : []);
-          }
-        } catch {
-          // Achievement tidak kritikal
+            if (res.status === 401 || res.status === 403) {
+                navigate('/login');
+                return;
+            }
+
+            const text = await res.text();
+            if (!res.ok) {
+                setHasilKuis(text || 'Gagal submit kuis');
+                return;
+            }
+
+            setHasilKuis(text);
+            setJawaban('');
+
+            const achievementRes = await fetch(`${API_BASE}/api/achievements/me`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (achievementRes.ok) {
+                const achievementData = await achievementRes.json();
+                setMyAchievements(Array.isArray(achievementData) ? achievementData : []);
+            }
+        } catch (err) {
+            setHasilKuis(err.message || 'Terjadi kesalahan saat submit kuis.');
+        } finally {
+            setIsSubmittingQuiz(false);
         }
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          setError(err.message || 'Terjadi kesalahan saat memuat data.');
-        }
-      } finally {
-        setLoading(false);
-      }
     };
 
-    load();
-    return () => controller.abort();
-  }, [id, navigate]);
+    const relatedComments = useMemo(() => {
+        return comments.filter((comment) => {
+            const bacaanId = comment?.bacaan?.id ?? comment?.bacaanId;
+            const isForThisBacaan = String(bacaanId) === String(id);
+            const isRootComment = !comment?.parentId && !comment?.parentCommentId;
+            return isForThisBacaan && isRootComment;
+        });
+    }, [comments, id]);
 
-  const relatedComments = useMemo(
-    () => comments.filter((comment) => (comment?.bacaan?.id === id || comment?.bacaanId === id) && !comment?.parentId),
-    [comments, id]
-  );
+    const handleMainCommentSubmit = async (e) => {
+        e.preventDefault();
 
-  if (loading) return <div className="page-container"><p>Memuat detail bacaan...</p></div>;
+        const token = getToken();
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
-  if (error) {
+        if (!newComment.trim()) {
+            return;
+        }
+
+        setIsSubmittingComment(true);
+        try {
+            const payload = {
+                isiKomentar: newComment.trim(),
+                bacaanId: id,
+            };
+
+            const res = await fetch(`${API_BASE}/api/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                navigate('/login');
+                return;
+            }
+
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Gagal mengirim komentar');
+            }
+
+            setNewComment('');
+            await fetchCommentsOnly();
+        } catch (err) {
+            setError(err.message || 'Terjadi kesalahan saat mengirim komentar.');
+        } finally {
+            setIsSubmittingComment(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="page-container">
+                <p>Memuat detail bacaan...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="page-container">
+                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>
+                    ← Kembali
+                </Link>
+                <p style={{color: 'var(--red)'}}>{error}</p>
+            </div>
+        );
+    }
+
+    if (!bacaan) {
+        return (
+            <div className="page-container">
+                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>
+                    ← Kembali
+                </Link>
+                <p>Bacaan tidak ditemukan.</p>
+            </div>
+        );
+    }
+
     return (
-      <div className="page-container">
-        <Link to="/" style={{ color: 'var(--blue)', textDecoration: 'none' }}>← Kembali</Link>
-        <p style={{ color: 'var(--red)' }}>{error}</p>
-      </div>
-    );
-  }
-
-  if (!bacaan) {
-    return (
-      <div className="page-container">
-        <Link to="/" style={{ color: 'var(--blue)', textDecoration: 'none' }}>← Kembali</Link>
-        <p>Bacaan tidak ditemukan.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="page-container" style={{ gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link to="/" style={{ color: 'var(--blue)', textDecoration: 'none' }}>← Kembali</Link>
-        <Link to={`/bacaan/${id}/comment/new`}>
-          <button className="btn btn-add" type="button">+ Tambah Komentar</button>
-        </Link>
-      </div>
-
-      {/* --- KOTAK BACAAN --- */}
-      <section className="form-card" style={{ maxWidth: 'none' }}>
-        <h2 style={{ color: 'var(--lavender)', marginTop: 0 }}>{bacaan.judul}</h2>
-        {bacaan.kategori && (
-          <span style={{ backgroundColor: 'var(--blue)', color: 'var(--base)', padding: '4px 12px', borderRadius: '12px', fontSize: '14px', display: 'inline-block', marginBottom: '20px' }}>
-            Kategori: {bacaan.kategori}
-          </span>
-        )}
-        <p style={{ color: 'var(--subtext0)', marginBottom: '16px', wordBreak: 'break-all' }}>ID: {bacaan.id}</p>
-        <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{bacaan.isiTeks}</p>
-      </section>
-
-      {/* --- KOTAK KUIS --- */}
-      <section className="form-card" style={{ maxWidth: 'none' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ color: 'var(--lavender)', margin: 0 }}>Kuis Pemahaman</h3>
-
-          <Link to={`/bacaan/${id}/kuis/create`}>
-            <button className="btn btn-add" type="button" style={{ padding: '6px 12px', fontSize: '13px' }}>+ Tambah Soal</button>
-          </Link>
-        </div>
-
-        {(!bacaan.quizzes || bacaan.quizzes.length === 0) ? (
-          <p style={{ marginTop: 0 }}>Belum ada kuis untuk bacaan ini.</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
-
-            {bacaan.quizzes.map((q, index) => (
-              <div key={q.id} style={{ padding: '12px', backgroundColor: 'var(--base)', borderRadius: '8px', border: '1px solid var(--surface1)' }}>
-                <p style={{ margin: '0 0 10px 0' }}><strong>Soal {index + 1}:</strong> {q.pertanyaan}</p>
-
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                  <Link to={`/bacaan/${id}/kuis/${q.id}/edit`}>
-                    <button className="btn btn-edit" style={{ padding: '4px 10px', fontSize: '12px' }} type="button">Edit</button>
-                  </Link>
-                  <Link to={`/bacaan/${id}/kuis/${q.id}/delete`}>
-                    <button className="btn btn-delete" style={{ padding: '4px 10px', fontSize: '12px' }} type="button">Hapus</button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-
-            {/* 👇 INI YANG BARU: TOMBOL PINDAH KE HALAMAN KUIS 👇 */}
-            <div style={{ marginTop: '20px', textAlign: 'center', borderTop: '1px solid var(--surface1)', paddingTop: '20px' }}>
-              <Link to={`/bacaan/${id}/mulai-kuis`}>
-                <button className="btn" style={{ backgroundColor: 'var(--green)', color: 'var(--base)', padding: '12px 24px', fontSize: '16px', fontWeight: 'bold' }}>
-                  📝 Mulai Kerjakan Kuis
-                </button>
-              </Link>
+        <div className="page-container" style={{display: 'flex', flexDirection: 'column', gap: '28px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Link to="/" style={{color: 'var(--blue)', textDecoration: 'none'}}>
+                    ← Kembali
+                </Link>
             </div>
 
-          </div>
-        )}
+            <section className="form-card" style={{maxWidth: 'none'}}>
+                <h2 style={{color: 'var(--lavender)', marginTop: 0}}>{bacaan.judul}</h2>
+                <p
+                    style={{
+                        color: 'var(--subtext0)',
+                        marginBottom: '16px',
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    ID: {bacaan.id}
+                </p>
+                <p style={{whiteSpace: 'pre-wrap', lineHeight: 1.6}}>{bacaan.isiTeks}</p>
+            </section>
 
-        <p style={{ marginTop: '16px', marginBottom: '6px', color: 'var(--subtext0)' }}>Achievement saya:</p>
-        {myAchievements.length === 0 ? (
-          <p style={{ margin: 0 }}>Belum ada achievement.</p>
-        ) : (
-          <ul style={{ margin: 0, paddingLeft: '18px' }}>
-            {myAchievements.map((achievement) => (
-              <li key={achievement.achievementId}>
-                {achievement.name} - {achievement.description}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+            <section className="form-card" style={{maxWidth: 'none'}}>
+                <h3 style={{color: 'var(--lavender)', marginTop: 0}}>Kuis Pemahaman</h3>
+                <p style={{marginTop: 0}}>{bacaan.quizzes?.[0]?.pertanyaan || 'Belum ada kuis untuk bacaan ini.'}</p>
 
-      {/* --- KOTAK KOMENTAR --- */}
-      <section className="form-card" style={{ maxWidth: 'none' }}>
-        <h3 style={{ color: 'var(--lavender)', marginTop: 0 }}>Komentar ({relatedComments.length})</h3>
-        {relatedComments.length === 0 ? (
-          <p style={{ color: 'var(--subtext0)' }}>Belum ada komentar untuk bacaan ini.</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {relatedComments.map((comment) => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                bacaanId={id}
-                onCommentRefresh={refreshComments}
-                currentUser={currentUser}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-  );
+                {bacaan.quizzes?.[0] ? (
+                    <form onSubmit={handleSubmitKuis} style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                        <input
+                            type="text"
+                            className="input-entry"
+                            placeholder="Masukkan jawaban Anda"
+                            value={jawaban}
+                            onChange={(e) => setJawaban(e.target.value)}
+                            required
+                            style={{flex: '1 1 300px'}}
+                        />
+                        <button className="btn btn-detail" type="submit" disabled={isSubmittingQuiz}>
+                            {isSubmittingQuiz ? 'Mengirim...' : 'Kirim Jawaban'}
+                        </button>
+                    </form>
+                ) : null}
+
+                {hasilKuis ? (
+                    <p
+                        style={{
+                            marginTop: '12px',
+                            color: hasilKuis.includes('Benar') ? 'var(--green)' : 'var(--red)',
+                        }}
+                    >
+                        {hasilKuis}
+                    </p>
+                ) : null}
+
+                <p style={{marginTop: '16px', marginBottom: '6px', color: 'var(--subtext0)'}}>Achievement saya:</p>
+                {unlockedAchievements.length === 0 ? (
+                    <p style={{margin: 0}}>Belum ada achievement yang terbuka.</p>
+                ) : (
+                    <ul style={{margin: 0, paddingLeft: '18px'}}>
+                        {unlockedAchievements.map((achievement) => (
+                            <li key={achievement.achievementId}>
+                                {achievement.name} - {achievement.description}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
+
+            <section className="form-card" style={{maxWidth: 'none'}}>
+                <h3 style={{color: 'var(--lavender)', marginTop: 0}}>
+                    Forum Diskusi ({relatedComments.length} Komentar Utama)
+                </h3>
+
+                <form
+                    onSubmit={handleMainCommentSubmit}
+                    style={{marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px'}}
+                >
+                    <textarea
+                        className="input-entry"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Tuliskan komentar Anda untuk bacaan ini..."
+                        rows="3"
+                        required
+                        style={{width: '100%', resize: 'vertical'}}
+                    />
+                    <button
+                        className="btn btn-add"
+                        type="submit"
+                        disabled={isSubmittingComment}
+                        style={{alignSelf: 'flex-end'}}
+                    >
+                        {isSubmittingComment ? 'Mengirim...' : 'Kirim Komentar'}
+                    </button>
+                </form>
+
+                <hr style={{borderColor: 'var(--surface1)', margin: '20px 0'}}/>
+
+                {relatedComments.length === 0 ? (
+                    <p style={{color: 'var(--subtext0)'}}>Belum ada komentar untuk bacaan ini. Jadilah yang pertama!</p>
+                ) : (
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+                        {relatedComments.map((comment) => (
+                            <CommentItem
+                                key={comment.id}
+                                comment={comment}
+                                bacaanId={id}
+                                onCommentRefresh={fetchCommentsOnly}
+                                currentUser={currentUser}
+                            />
+                        ))}
+                    </div>
+                )}
+            </section>
+        </div>
+    );
 }
