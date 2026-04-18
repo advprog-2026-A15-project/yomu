@@ -18,5 +18,4 @@ VALUES ('11111111-1111-1111-1111-111111111111', 'Pentingnya Literasi Digital',
         'Literasi digital membantu kita menyaring informasi yang salah atau hoax.');
 
 INSERT INTO quiz (id, bacaan_id, pertanyaan, jawaban_benar)
-VALUES ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111',
-        'Apa yang bisa kita saring dengan literasi digital?', 'hoax');
+VALUES ('66666666-6666-6666-6666-666666666666', '55555555-5555-5555-5555-555555555555', 'Bumi adalah planet keberapa dari matahari?', 'ketiga');
